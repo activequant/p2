@@ -1,0 +1,48 @@
+QuoteRecorder
+
+	Quote recorder records data in the new archive format into a target folder. 
+	Per instrument id, one folder will be created, in which per day a subfolder is created. In there a file quotes.csv contains recorded quotes. 
+	Data is appended to the end of the file. 
+	
+	By default it uses the JMS data source: 
+
+----
+<bean id="quoteSourceJms" class="org.activequant.util.tempjms.JMSQuoteSubscriptionSource">
+	<constructor-arg><value>83.169.9.78</value></constructor-arg>
+	<constructor-arg><value>7676</value></constructor-arg>
+</bean>
+<!--  main class -->
+<bean id="context" class="org.activequant.util.QuoteRecorder"
+	init-method="record">
+	<property name="source" ref="quoteSourceJms" />
+	<property name="dao" ref="quoteArchiveDao" />
+	<property name="specDao" ref="specificationDao" />
+</bean>
+----
+
+	In order to use IB, you have to replace the above snippet with: 
+			
+----
+TO BE ADDED. 
+----			
+
+
+	To record instruments from a specific vendor only (that's matched against the instrument specifications from the master database) modify quoterecorder.xml as shown below. Only 
+	specs that match are considered for subscribing. Usually it's null, so it will record everything. 
+	
+----
+<!--  main class -->
+<bean id="context" class="org.activequant.util.QuoteRecorder"
+	init-method="record">
+	<property name="source" ref="quoteSourceJms" />
+	<property name="dao" ref="quoteArchiveDao" />
+	<property name="specDao" ref="specificationDao" />
+	<property name="vendorIdentifier" value="IB" />
+</bean>	 
+----
+
+	Starting the QuoteRecorder can happen through the start script in the base folder of P2: 
+	
+----
+sh runQuoteRecorder.sh
+----	

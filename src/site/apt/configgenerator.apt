@@ -1,0 +1,8 @@
+ConfigGeneratorStub
+
+	The class ConfigGeneratorStub can be used to quickly generate a simulation config or 
+	algo env config. 
+	
+	It is a very small and short utility class that uses the persistence layer to save it 
+	somewhere. 
+	

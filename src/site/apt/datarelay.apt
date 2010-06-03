@@ -1,0 +1,52 @@
+DataRelay
+
+	The data relay is a generic tool to relay quotes received on a TCP socket in ASCII/CSV format to a JMS channel. 
+	It is very handy when you have a non java data source and want to make the quotes available over JMS. 
+	Of course, this relaying introduces a little bit of latency, usually in the dimension of some milliseconds. 
+	
+	By default it listens on TCP port 22223 for incoming connections and reads then line wise from the socket. 
+
+	The data relay needs to be linked to the activequant master database. Whenever an instrument specification arrives, it will try to resolve 
+	an instrument specification instance from the activequant master database. If a matching instrument cannot be found, it will generate entries for new instrument specifications.  
+	
+	
+Protocol used
+
+	The data relay can accept ticks and quotes. The first character (Q or T) indicates the type of the transmitted line.  
+
+* Instrument specification 
+	
+	Instrument specification are separated by commas instead of semicolons. They are nested inside Quotes or TradeIndication lines. 
+
+	Spec information must have the format: 
+	
+----
+	<InstrumentName>,<Exchange>,<Currency>,<Vendor>
+----		
+	
+	
+* Quote protocol 
+
+	CSV lines must have the format: 
+	
+----
+Q;<NanoSecTimeStamp>;<InstrumentSpecification>;<BidPrice>;<BidVolume>;<AskPrice>;<AskVolume>;
+----	
+
+
+* Trade Indication protocol 
+
+	CSV lines must have the format: 
+	
+----
+T;<NanoSecTimeStamp>;<InstrumentSpecification>;<Price>;<Volume>;
+----	
+
+
+Using and starting it
+
+	The DataRelay can be started through the runDataRelay.sh bash script. 
+	
+---- 
+sh runDataRelay.sh
+----			

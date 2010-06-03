@@ -1,0 +1,9 @@
+body.composite {
+	background-color: #ffffff;	
+ 	background-image: url(../images/background.png);
+ 	background-repeat: repeat-x;
+} 
+
+h3 {
+	background-color: #f0f0f0;	
+}

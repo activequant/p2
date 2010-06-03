@@ -1,0 +1,146 @@
+Introduction
+
+   	P2 is one part of the activequant suite, providing optimization and live running capabilities for algorithm trading. It is possible to use all AQ API modules from within P2. The project's pom file comes preconfigured with the most important AQ modules: aqt-framework, aqt-dao-hibernate and aqt-math. Plugging in your own algo and libraries has been made relatively easy.    	
+	 
+	AQP2 is distributed as source code only. Subversion details are given on the {{{source-repository.html}SVN info page}}.
+   	
+   	To use AQP2, a bash script interpreter and eclipse (or netbeans) are recommended. For windows, we recommend to use cygwin for the bash scripts. There are no windows bash scripts available, only linux/unix.  
+	 
+Dependencies
+
+	Depending on its usage mode, P2 has different requirements. 
+	
+* Local mode 
+
+	This one has no connection to the aq master database. It requires: recent JDK, Maven 2+, SVN, MySQL5+
+	
+* Online mode
+
+	It requires: recent JDK, Maven 2+, SVN			 
+	 
+	 
+	 
+Rough architetural overview
+
+	Details about the classes and their purposes are available either in the JavaDocs or on other pages of this site. 
+	
+	
+[./images/classdiag1.png] Architecture
+		 
+	 
+	 
+The most import domain model classes explained
+
+	Before we talk about how P2 streamlines algorithmic trading, a look at the different domain model classes is required. For information on the purpose of a domain model, see {{{http://en.wikipedia.org/wiki/Domain_model}Wikipedia}}.  
+
+* BatchConfig
+	
+	The batch config contains settings that are specifically relevant for batch runs. A batch run simulates a list of SimulationConfigs and 
+	generates an aggregated report. An example of a batch run is brute force optimization, where a huge amount of SimulationConfigs are simulated.
+	
+	The batch config can contain batch environment specific settings, for example where to put log files and a class name of a simulation config generator.  	  		
+		
+* SimulationConfig
+	
+	SimulationConfig contains settings that are necessary to run a simulation. Specific settings
+	include the simulation time frame and an AlgoEnvConfig.  
+	
+* AlgoEnvConfig
+	
+	AlgoEnvConfig stands for algo environment configuration. All settings that are environment specific, 
+	for example the instruments, start and stop times are contained here. Despite that the AlgoEnvConfig
+	contains an instance of an actual AlgoConfig. 
+	
+* AlgoConfig
+	
+	The AlgoConfig is at the lowest level of all config types. For wide reuse, it is a hashMap that contains
+	values relevant for the actual algorithm. In case of a dual average cross over algorithm, these values could 
+	be two period lengths. The algorithm has to implement a specific function, where it has to extract its
+	configuration from the AlgoConfig.
+		
+      
+  
+P2: Streamlining algorithmic trading
+
+   	Algorithmic trading splits into two main parts: Parameter optimization and Production Trading. Preferrably, you have already an idea about how your algorithm performs. We highly recommend the aqt-r package to get the most out of activequant. 
+	Let's assume you have an algorithm with one parameter only. Depending on several things, your risk aversion, your pnl expectation, your exposure taking capabilities one or the other parameter setting is preferred but of course for sure the trading output should be positive in terms of Pnl.  Therefore, an optimization to find the ideal parameters is necessary. 
+	
+	Once an optimum has been found, the corresponding configuration will run in a production mode to prove that it's really that good. Depending on the algorithm, quite some surprises might manifest. 
+
+
+* Parameter optimization
+
+	Optimization requries a BatchConfig instance which specifies where to get the list of simulations which to simulate from. At the moment of this writing, a plain brute force optimization is implemented, but indeed, one can imagine to implement genetic algorithms or some other nice search algorithms to find optimas.
+
+	At the end of every optimization run stands the report generation, which will in its current implementation generate a CSV file containing several useful statistics. I always load this .csv file into R and visualize and compute several statistics out of it. One that i like very much is a contour plot of the PNL for two dimensions of the parameters. Of course it is also possible to load this .csv file into excel for analysis, but this is up to personal taste.   
+
+	The relevant class for optimization is the BatchRunner. Look for it in the source tree, you'll find it. The BatchRunner itself takes a BatchConfig as an argument. At the moment, the main method of this class constructs one and passes it to the BatchRunner. Users of this will have to modify the main to reflect their specific settings. 
+
+	Following an example of how to use the BatchRunner.
+
+----
+BatchConfig bc = new BatchConfig();
+bc.setAlgoConfigSourceClass("org.activequant.tradesystems.bidaskratio.SimConfigSource");
+bc.setBatchReportTargetFileName("report_out_sample.csv");
+bc.setArchiveFolder("z:\\archive");
+new BatchRunner().batchRun(bc);
+----
+   
+	At the end of every start/stop interval, a forced trading stop is announced to the trade system. 
+
+	Technically, the main starting point is BatchRunner, as already written. Internally it delegates all simulation work to 
+	the SingularBacktester, from where it will receive a populated Report object. 
+
+* Backtesting a single configuration
+
+	Individual configuration files can be backtested easily with the class SingularBacktester. Running it reveals the necessary parameters. 
+
+* Production Trading
+  
+	The P2 approach is at the moment centered around configuration files. Not that it's not possible to obtain configurations by other means, we just didn't implement it, as the file based approach works very well for our needs. 
+
+ 
+** Generate an AlgoEnvConfig file
+
+	Use org.activequant.util.ConfigGeneratorStub to generate a specific algoEnvConfig file or a 
+	SimConfig file. The user has to modify the source code of ConfigGeneratorStub to generate a 
+	file of his choice. 
+
+** Starting the environment with a configuration file
+
+	The main class for production trading is AlgoEnvConfigRunner. This classes main method uses, contrary to the optimizer at the moment, a spring xml for wiring and instantiating everything. As constructor method, it takes an config folder, a config id, a log file name and a JMS connection. As said, at the moment this is how it works. The config id specifies which config file will be loaded from the specified config folder. The log file name declares where to write the logs to and the JMS connection is an object that has to be injected and will be used to receive quotes from. 
+
+   At the moment, production trading or paper trading requires an algoEnvConfig file (can be generated). That's just how it works right now. Feel free to implement your own way and submit it. 
+
+----
+
+public static void main(String[] args) throws Exception {
+	ServiceLocator.instance("data/algoenvrunner.xml").getContext().getBean("runner");
+}
+----
+
+	See the file data/algoenvrunner.xml for details on the wiring. 	Similar to simulations, at the end of every start/stop interval, a forced trading stop is announced to the trade system. 
+
+** While running ...
+
+	The algorithm environment receives quotes from the JMS data source and forwards these straight through to the trading system.  
+
+	You can also access through JMX / jconsole the current trading process. At the moment only a few methods are exposed, namely method to get the current pnl and a string representation of the current positions. 
+
+Utilities here and there
+
+* DataRelay
+
+	Relays data from a telnet socket to JMS, more details are available in the {{{datarelay.html}DataRelay documentation}}.
+
+* QuoteRecorder
+	
+	Records data into the new archive format, one folder per instrument specification id, one subfolder per date, several data files depending on the data type.
+	 
+	Details are available in the {{{quoterecorder.html}QuoteRecorder documentation}}.
+
+* GUI
+
+	Propably the most user friendly utility in this application suite is the GUI. This part resembles the control center for simulating configurations as well as running trade systems. It is not possible to start optimizations from this application. 	
+
+ 

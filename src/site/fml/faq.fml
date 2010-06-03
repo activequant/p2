@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faqs title="Frequently Asked Questions">
+  <part id="Compiling and building">  
+  	<faq id="starter">
+  		<question>Can you show how to get started with this babe ? </question>
+  		<answer>
+  			Sure. The following is a transcript of all it takes to get going. To be absolute water proof, I created a new 
+  			user called aqp2. All that is left in the end is importing the generated project file into eclipse (netbeans/intellij).
+  			<source>
+  			rotsee:/home/ustaudinger# adduser aqp2 --disabled-password
+Adding user `aqp2' ...
+Adding new group `aqp2' (1002) ...
+Adding new user `aqp2' (1002) with group `aqp2' ...
+The home directory `/home/aqp2' already exists.  Not copying from `/etc/skel'.
+Changing the user information for aqp2
+Enter the new value, or press ENTER for the default
+        Full Name []:
+        Room Number []:
+        Work Phone []:
+        Home Phone []:
+        Other []:
+Is the information correct? [Y/n] y
+rotsee:/home/ustaudinger# su - aqp2
+aqp2@rotsee:~$ export JAVA_HOME=/opt/jdk1.6.0_17/
+aqp2@rotsee:~$ export M2_HOME=/opt/apache-maven-2.2.1
+aqp2@rotsee:~$ export MVN_HOME=/opt/apache-maven-2.2.1
+aqp2@rotsee:~$ export PATH=$JAVA_HOME/bin:$M2_HOME/bin:$PATH
+aqp2@rotsee:~$ mvn -version
+Apache Maven 2.2.1 (r801777; 2009-08-06 19:16:01+0000)
+Java version: 1.6.0_17
+Java home: /opt/jdk1.6.0_17/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux" version: "2.6.26-2-686" arch: "i386" Family: "unix"
+aqp2@rotsee:~$
+aqp2@rotsee:~$  svn checkout svn://activequant.org/opt/repositories/hidden/p2 activequant-p2
+A    activequant-p2/runQuoteRecorder.sh
+A    activequant-p2/config.xml
+[....]
+A    activequant-p2/README
+A    activequant-p2/run.sh
+Checked out revision 186.
+aqp2@rotsee:~$
+
+aqp2@rotsee:~/activequant-p2$ mvn eclipse:eclipse
+[INFO] Scanning for projects...
+Downloading: http://repo1.maven.org/maven2/org/apache/maven/plugins/maven-site-plugin/2.0-beta-7/maven-site-plugin-2.0-beta-7.pom
+
+Downloading: http://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugin
+
+
+[... long time later as maven pulls in all plugins on first run, somewhere in between  ... ]
+
+
+Downloading: http://download.java.net/maven/2//com/sun/messaging/mq/imq/4.4-SNAPSHOT/imq-4.4-20090827.200748-12.jar
+495K downloaded  (imq-4.4-20090827.200748-12.jar)
+Downloading: http://download.java.net/maven/2//com/sun/messaging/mq/jms/4.4-SNAPSHOT/jms-4.4-20090827.200748-11.jar
+56K downloaded  (jms-4.4-20090827.200748-11.jar)
+
+
+[... and now the other dependencies are downloaded ... ]
+
+[INFO] Wrote settings to /home/aqp2/activequant-p2/.settings/org.eclipse.jdt.core.prefs
+[INFO] Wrote Eclipse project for "activequant-p2" to /home/aqp2/activequant-p2.
+[INFO]
+       Sources for some artifacts are not available.
+       Please run the same goal with the -DdownloadSources=true parameter in order to check remote repositories for sources.
+       List of artifacts without a source archive:
+         o com.sun.messaging.mq:imq:4.4-20090827.200748-12
+         o com.sun.messaging.mq:jms:4.4-20090827.200748-11
+
+[...]        
+
+         o org.mortbay.jetty:servlet-api-2.5:6.1H.4rc1
+         o org.springframework:spring-aop:2.5.6
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 8 minutes 16 seconds
+[INFO] Finished at: Thu Dec 24 09:26:41 UTC 2009
+[INFO] Final Memory: 14M/26M
+[INFO] ------------------------------------------------------------------------
+aqp2@rotsee:~/activequant-p2$
+
+  			</source>
+  			Done.
+  		</answer>
+  	</faq> 
+    <faq id="cglib-prob">
+      <question>When building for the first time, there is a cglib dependency problem showing up.</question>
+      <answer>
+        <p>
+          Manually download the jar http://mirrors.ibiblio.org/pub/mirrors/maven2/cglib/cglib-nodep/2.1_3/ 
+          and overwrite the one in the local maven repository with it. 
+        </p>       
+      </answer>
+    </faq>
+    <faq id="jmslibs-not-there">
+      <question>The JMS libraries (com.sun.messaging.mq:jms:jar:4.4-SNAPSHOT and com.sun.messaging.mq:imq:jar:4.4-SNAPSHOT) are missing and maven complains. What can I do and where can I retrieve them ? </question>
+      <answer>
+        <p>
+        Usually the dependencies should be resolved automatically, as the dependency repository has been added to the pom. However, we suspect that especially the java/sun repository 
+        seems to have some down times. When that happens, check if http://download.java.net/maven/2/com/sun/messaging/mq/ responds. If that works and problems still exist, 
+        try downloading the jars manually from that place and then follow the instructions that maven gives.  
+        </p>       
+      </answer>
+    </faq>
+   </part>
+   <part id="Configuration">    
+    <faq id="noaqorgdb">
+      <question>I don't want to rely and use the activequant.org master database. What do I have to do ? </question>
+      <answer>
+        <p>
+			Update ./src/main/resources/activequantdao/database-activequant.properties to your settings and also 
+			./src/main/resources/data/database-batch.properties. 
+        </p>       
+      </answer>
+    </faq>
+  </part>
+</faqs>

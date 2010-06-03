@@ -1,0 +1,9 @@
+CandleRecorder
+
+	The RudeCandleRecorder listens for quotes on a jms channel and candleizes these. It saves the candles through the RecorderCandleDao into a CSV file. 
+
+	Starting the RudeCandleRecorder can happen through the start script in the base folder of P2: 
+	
+----
+sh runCandleRecorder.sh
+----	

@@ -1,0 +1,149 @@
+	<<Note in advance>>: <P2 requires in its default configuration state an active internet connection, as it will load instrument specifications from the master database. 
+	Of course this can be changed, but is out of the scope of this document.> 
+
+Backtesting an individual configuration 
+
+* Generating a SimulationConfig
+
+    Open the class "ConfigGeneratorStub". Have a quick look at it, by default 
+    it generates a SimulationConfig file for the Vlx algorithm. The ID of this 
+    file is 100. 
+    
+    Next, run it. The following lines specify where a SimulationConfig is written to. 
+    
+----
+    t.save("./src/main/resources/algoconfigs", simConfig.getId(), simConfig);
+----
+
+	It will then generate a file 100 in the specified folder.     
+
+* Simulating a SimulationConfig    
+
+	Now that we have an individual configuration, let's backtest it with the SimConfigFileBacktester class.
+	This is the central class when it comes to backtesting an individual configuration, at the end of a simulation, 
+    a nice report shows the system's performance and some statistics. This report is highly flexible.
+    
+    Running it for the first time without parameters, will show a usage notice. 
+    
+----
+= = = = = = = = = = = = = = = = = = = =
+Usage: 
+ java org.activequant.backtesting.SimConfigFileBacktester <configfolder> <configid> <archivefolder> <reportFileName>
+where: 
+ configfolder is the folder containing the configuration file 
+ configid is the configuration number, ie. something like 10350 
+ archivefolder is the data archive folder 
+ reportFileName is the folder where the log and charts are written to
+as a return the simple report is printed, which will contain values of some sort. 
+= = = = = = = = = = = = = = = = = = = =
+Your input: 
+= = = = = = = = = = = = = = = = = = = =
+----
+
+	Clearly, the SimConfigFileBacktester needs four command line parameters. For example ... 
+	
+----
+./src/main/resources/algoconfigs 100 ./src/main/resources/testarchive ./report.html
+----	
+	
+	Now, we can run it. Once it has completed, there will be a report generated, which we can open in Mozilla Firefox. 
+	
+
+
+Optimizing
+	
+	If we assume that you need to find a good parameter combination, it's wise to do some optimization. At the moment, only
+	brute force optimization is supported.  
+	
+	The main loop for optimization is in class BatchRunner. BatchRunner's main requires a spring config file
+	as argument.  An example is file data/batchrunner.xml. Open it and modify ...
+	
+----
+ 	<!--  String algoConfigSourceClass, String batchReportTargetFileName, String archiveFolder  -->
+    <bean id="runner" class="org.activequant.optimization.BatchRunner">	   
+	    <constructor-arg>	    	
+	    		<value>org.activequant.tradesystems.dualsmax.SimConfigSource</value>	  	
+	    </constructor-arg>
+	     <constructor-arg>
+	      		<value>/home/ustaudinger/scratch/report_out_sample.cs</value>	
+	    </constructor-arg>
+	    <constructor-arg>
+	      		<value>/home/ustaudinger/workspace/p2/src/main/resources/testarchive</value>	
+	    </constructor-arg>	
+    </bean>
+----
+
+    ... to something that fits your environment. As optimization works over a list of SimConfigs, 
+    the BatchRunner requires some sim config data source. The file name of this is the first parameter. 
+    The second parameter specifies where the csv report is being written to. This can be loaded into Excel.
+    The third parameter contains a pointer to your backtesting data archive. 
+    
+    AQ P2 ships with a very small testarchive to get started quickly. Modify all folder definitions to 
+    point to the right place on your disc. Relative paths are also possible.  
+    
+    Now run BatchRunner and wait. 
+    
+    When done, there will be a CSV file containing the report. Review it in Excel. BatchRunner also generates 
+    an HTML repor
+
+    
+Running a config in production 
+
+	Let's assume we have some good parameter settings.  
+    
+* Generating an AlgoEnvConfig
+
+	Modify the class "ConfigGeneratorStub", as you know already, in there we have some parameter settings. Modify these parameter settings to match your good configuration. 
+	Of course it is easy to imagine that you can obtain good parameters from a different source or process. 
+	
+	For now, replace
+	
+----
+	SimpleSerializer<SimulationConfig> t = new SimpleSerializer<SimulationConfig>();
+	System.out.println(t.serialize(simConfig));
+----
+
+	with ... 
+	
+----
+	SimpleSerializer<AlgoEnvConfig> t = new SimpleSerializer<AlgoEnvConfig>();
+	System.out.println(t.serialize(simConfig.getAlgoEnvConfig()));			
+   	t.save("./src/main/resources/algoconfigs", simConfig.getId(), simConfig.getAlgoEnvConfig());
+----
+	
+	... so that we generate a new AlgoEnvConfig file and not a SimulationConfig file. 
+	Production requires an AlgoEnvConfig.
+
+
+	Now run the ConfigGeneratorStub again, as a result you'll have a config file with id 100 in algoconfigs.
+
+* Running it in Production
+
+	Open AlgoEnvConfigRunner, check the main method. It points to data/algoenvrunner.xml. 
+	Open algoenvrunner.xml, modify the runner bean. 
+	
+	Change ...
+	 
+----
+    <bean id="runner" class="org.activequant.production.AlgoEnvConfigRunner">	   
+	    <constructor-arg>	    	
+	    		<value>./src/main/resources/algoconfigs</value>	  	
+	    </constructor-arg>
+	     <constructor-arg>
+	      		<value>100</value>	
+	    </constructor-arg>
+	    <constructor-arg>
+	      		<value>/scratch/ulst/live.log</value>	
+	    </constructor-arg>
+	    <constructor-arg>
+	    	<ref bean="jmsConnection"/>
+	    </constructor-arg>
+    </bean>	
+----
+
+	... to your values. The third argument is the place of the log file. 
+	
+	Now start AlgoEnvConfigRunner and watch the log file, tail on linux is a good candidate. 
+	
+	
+	t.   	

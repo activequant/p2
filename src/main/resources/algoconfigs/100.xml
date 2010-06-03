@@ -1,0 +1,40 @@
+<org.activequant.optimization.domainmodel.SimulationConfig>
+  <simulationDays>
+    <int>20090615</int>
+    <int>20090616</int>
+    <int>20090617</int>
+    <int>20090618</int>
+  </simulationDays>
+  <algoEnvConfig>
+    <instruments>
+      <int>34</int>
+    </instruments>
+    <startStopTimes>
+      <org.activequant.core.types.Tuple>
+        <object1 class="int">0</object1>
+        <object2 class="int">230000</object2>
+      </org.activequant.core.types.Tuple>
+    </startStopTimes>
+    <algoConfig serialization="custom">
+      <unserializable-parents/>
+      <map>
+        <default>
+          <loadFactor>0.75</loadFactor>
+          <threshold>12</threshold>
+        </default>
+        <int>16</int>
+        <int>2</int>
+        <string>periods</string>
+        <int>100</int>
+        <string>factor</string>
+        <int>2</int>
+      </map>
+      <org.activequant.optimization.domainmodel.AlgoConfig>
+        <default>
+          <algorithm>org.activequant.tradesystems.vlx.Vlx1</algorithm>
+        </default>
+      </org.activequant.optimization.domainmodel.AlgoConfig>
+    </algoConfig>
+  </algoEnvConfig>
+  <id>100</id>
+</org.activequant.optimization.domainmodel.SimulationConfig>

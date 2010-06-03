@@ -1,0 +1,10 @@
+SingleSimConfigSourceBacktester
+
+	This class is there to simulate a sim config it obtains from a ISimConfigSource class. Meaning: It does not require a sim config file, but instantiates an ISimConfigSource and gets the first sim config from the source.simConfigs() method and simulates that.
+
+	Example of use:
+
+----
+java  org.activequant.backtesting.SingleSimConfigSourceBacktester    ./src/main/resources/testarchive ./temp org.activequant.tradesystems.vlx.SingleSimConfigSource
+----
+

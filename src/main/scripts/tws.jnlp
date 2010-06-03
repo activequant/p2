@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<jnlp codebase="http://www.interactivebrokers.com/java/classes/" href="edemo.jnlp">
+	<information>
+		<title>TWS</title>
+		<vendor>Interactive Brokers</vendor>
+    		<homepage href="http://www.interactivebrokers.com"/>
+		<icon width="64" height="64" href="tws64x64.jpg"/>	
+		<description>Interactive Brokers Trader Workstation</description>
+	</information>
+	
+	<security>
+		<all-permissions/>
+	</security>
+	
+	<resources>
+		<j2se version="1.5+" java-vm-args="-Dsun.java2d.noddraw=true -Xmx256M"/>
+		<j2se version="1.4+" java-vm-args="-Dsun.java2d.noddraw=true -Xmx256M"/>
+		<jar href="jts.jar"/>
+		<jar href="pluginsupport.jar"/>
+		<jar href="jcommon-1.0.0.jar"/>
+		<jar href="jfreechart-1.0.0.jar"/>
+		<jar href="jhall.jar"/>
+		<jar href="other.jar"/>
+		<jar href="rss.jar"/>
+		<property name="sun.java2d.noddraw" value="true"/> 
+	</resources>
+
+	<application-desc main-class="jclient.LoginFrame"> 
+		<argument>c:\ibjts</argument>
+		<argument>gw1.ibllc.com:4000</argument>
+	</application-desc>
+</jnlp>

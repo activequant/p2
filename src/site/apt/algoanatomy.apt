@@ -1,0 +1,22 @@
+Introduction
+
+	Generic frameworks require generic interfaces. P2 is no exception, in it all algos in P2 are derived from a common interface IBatchTradeSystem. In this document we look at the details of such algos and do a quick walk through. The ideal reference is the javadoc page of IBatchTradeSystem. 
+
+	Not all trading systems have to generate orders, 
+	some utilities that require account information can be implemented 
+	as trading systems easily. Good examples are systems that compute 
+	the current PNL or implied vola trackers which price assets against each 
+	other and forward any found mispricing to a little message box on the screen. 
+	Only your imagination is the limit. 
+
+
+
+The AlgoEnvironment
+
+	The algo environment is the environment for an algo.  
+	It is initialized by the runtime container, either production or simulation. 
+	The algo environment configuration is injected into the algo environment upon start. 
+
+
+
+

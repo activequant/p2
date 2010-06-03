@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+	<import resource="classpath:core/converters.xml" />
+	<import resource="classpath:activequantdao/dao-hibernate.xml" />
+	
+	<bean id="quoteArchiveDao" class="org.activequant.util.RecorderQuoteDao">
+		<constructor-arg>
+		<value>/home/share/archive</value>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="quoteSourceJms" class="org.activequant.util.tempjms.JMSQuoteSubscriptionSource">
+		<constructor-arg><value>localhost</value></constructor-arg>
+		<constructor-arg><value>7676</value></constructor-arg>
+	</bean>
+	
+	<!--  main class -->
+	<bean id="context" class="org.activequant.util.QuoteRecorder"
+		init-method="record">
+		<property name="source" ref="quoteSourceJms" />
+		<property name="dao" ref="quoteArchiveDao" />
+		<property name="specDao" ref="specificationDao" />
+	</bean>
+</beans>

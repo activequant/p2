@@ -1,0 +1,314 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<name>P2</name>
+	<description> ActiveQuant P2 is a trading application suite. It
+		consists of several subparts: optimization, backtesting, production
+		trading. </description>
+	<groupId>org.activequant</groupId>
+	<artifactId>activequant-p2</artifactId>
+	<version>1.3-SNAPSHOT</version>
+	<url>http://activequant.org/wiki/aqt-examples</url>
+	<developers>
+		<developer>
+			<id>ustaudinger</id>
+			<name>Ulrich Staudinger</name>
+			<email>ustaudinger@gmail.com</email>
+			<url>http://activequant.org</url>
+			<organization>ActiveQuant</organization>
+			<organizationUrl>http://activequant.org</organizationUrl>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>Quentin Bossard</name>
+			<roles>
+				<role>Early beta tester</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>Daniel Perez</name>
+			<roles>
+				<role>Early beta tester</role>
+			</roles>
+		</contributor>
+	</contributors>
+	<scm>
+		<connection> scm:svn:svn://activequant.org/opt/repositories/hidden/p2 
+		</connection>
+		<developerConnection>
+			scm:svn:svn://activequant.org/opt/repositories/hidden/p2 
+		</developerConnection>
+		<url>http://activequant.org/svn/hidden/p2</url>
+	</scm>
+	<licenses>
+		<license>
+			<name>GNU General Public License</name>
+			<url>http://www.gnu.org/licenses/gpl.html</url>
+			<comments> AQ uses dual license model: commercial-friendly licensing
+				is available upon request. </comments>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<issueManagement>
+		<system>Redmine</system>
+		<url>http://activequant.org/projects/aqt-examples/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>continuum</system>
+		<url>http://activequant.org/continuum</url>
+	</ciManagement>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId> maven-project-info-reports-plugin </artifactId>
+				<version>2.1</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>index</report>
+							<!--
+								report>dependencies</report> <report>issue-tracking</report
+							-->
+							<report>mailing-list</report>
+							<report>scm</report>
+							<report>license</report>
+							<report>project-team</report>
+							<!-- report>cim</report -->
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<aggregate>true</aggregate>
+					<minmemory>512m</minmemory>
+					<maxmemory>1g</maxmemory>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>2.1</version>
+			</plugin>
+		</plugins>
+	</reporting>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<artifactId>maven-site-plugin</artifactId>
+				<configuration>
+					<templateFile>src/site/site.vm</templateFile>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- SHAME list: FIXME -->
+					<excludes>
+						<exclude>**/SetFieldTest.java</exclude>
+						<exclude>**/QuoteRecorderTest.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<repositories>
+		<repository>
+			<id>activequant-external-repository</id>
+			<url>http://activequant.org/m2/external</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>activequant-repository</id>
+			<url>http://activequant.org/m2/repo</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>maven2-repository.dev.java.net</id>
+			<name>Java.net Repository for Maven 2</name>
+			<url>http://download.java.net/maven/2/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	<distributionManagement>
+		<repository>
+			<id>activequant-ustaudinger</id>
+			<url> scp://activequant.org/opt/0.8-stable/public/m2/repo </url>
+		</repository>
+		<snapshotRepository>
+			<id>activequant-ustaudinger</id>
+			<url> scp://activequant.org/opt/0.8-stable/public/m2/repo </url>
+		</snapshotRepository>
+		<site>
+			<id>activequant-ustaudinger</id>
+			<name>Maven Site</name>
+			<url>
+				scp://activequant.org/home/ustaudinger/p2-site/${project.version} 
+			</url>
+		</site>
+	</distributionManagement>
+	<dependencies>
+		<dependency>
+			<groupId>com.sun.messaging.mq</groupId>
+			<artifactId>jms</artifactId>
+			<version>4.4-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.messaging.mq</groupId>
+			<artifactId>imq</artifactId>
+			<version>4.4-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.activequant</groupId>
+			<artifactId>activequant-framework</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activequant</groupId>
+			<artifactId>activequant-filtering</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activequant</groupId>
+			<artifactId>activequant-adapter-simple</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activequant</groupId>
+			<artifactId>activequant-util-spring</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activequant</groupId>
+			<artifactId>activequant-util-charting</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activequant</groupId>
+			<artifactId>activequant-regression</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activequant</groupId>
+			<artifactId>activequant-dao-hibernate</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>jexcelapi</groupId>
+			<artifactId>jxl</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activequant</groupId>
+			<artifactId>activequant-messaging-jabber</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activequant</groupId>
+			<artifactId>activequant-messaging-email</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activequant</groupId>
+			<artifactId>activequant-adapter-ib</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>2.5.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.beanshell</groupId>
+			<artifactId>bsh</artifactId>
+			<version>2.0b4</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+		</dependency>
+
+		<!-- JDBC driver (runtime dependency) -->
+
+		<!-- Uncomment following lines if using Derby -->
+		<!--
+			Uncomment following lines if using PostgreSQL <dependency>
+			<groupId>postgresql</groupId> <artifactId>postgresql</artifactId>
+			<version>8.3-603.jdbc4</version> <scope>runtime</scope> </dependency>
+		-->
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jetty</artifactId>
+			<version>6.1H.4rc1</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.6</version>
+		</dependency>
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib</artifactId>
+			<version>2.1_3</version>
+		</dependency>
+	</dependencies>
+</project>

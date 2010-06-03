@@ -1,0 +1,5 @@
+Archive Format
+
+  The data archive can contain both candles and quotes. They are stored as plain text files in CSV format on disc. They are organized in a two level deep folder structure, where the first folder is the instrument id and the second folder is the date. In the date folder reside a "quotes.csv" and "candles_XX.csv" files, which contain the actual data. 
+
+

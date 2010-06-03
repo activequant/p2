@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="P2">
+
+	<bannerLeft>
+		<name>ActiveQuant - The Ruler</name>
+		<src>images/aq2_logo.png</src>
+		<href>http://activequant.org/</href>
+	</bannerLeft>
+
+	<poweredBy>
+		<logo name="ActiveQuant rules!" href="http://activequant.org"
+			img="images/activequant_rules.gif" />
+	</poweredBy>
+	<body>
+		<links>
+			<item name="ActiveQuant" href="http://www.activequant.org/" />
+		</links>
+
+		<menu name="Documentation">
+			<item name="Home" href="index.html" />
+			<item name="Overview" href="overview.html" />
+			<item name="Anatomy of an algo" href="algoanatomy.html" />
+			<item name="Walkthrough" href="walkthrough.html" />
+			<item name="FAQ" href="faq.html" />
+		</menu>
+		<menu name="Utilities">
+			<item name="Archive" href="archive.html" />
+			<item name="ConfigGeneratorStub" href="configgenerator.html" />
+			<item name="DataRelay" href="datarelay.html" />
+			<item name="QuoteRecorder" href="quoterecorder.html" />									
+			<item name="CandleRecorder" href="candlerecorder.html" />									
+		</menu>
+
+		<menu name="Algo Descriptions">
+			<item name="Momentum1" href="momentum1.html" />
+		</menu>
+
+
+		<menu ref="information" />
+		<menu ref="reports" />
+
+
+		<menu name="Legal">
+			<item name="Disclaimer" href="disclaimer.html" />
+		</menu>
+
+	</body>
+
+
+</project>

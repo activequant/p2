@@ -1,0 +1,44 @@
+README
+
+Requirements: 
+* Mysql Server up and running
+* Java
+
+Configuration procedure: 
+* Update src/main/resources/data/dabase-batch.properties to point to your mysql settings
+* Run the application once (it will generate the database schema, but will fail)
+* Connect to you mysql database and insert into (db: activequant) table InstrumentSpecification instruments for which you want to backtest
+* Next import Quotes into your database for the instruments for which you want to backtest, make sure the instrument mapping is correct
+
+
+
+
+BACKTESTING : 
+
+Simply run org.activequant.applications.BatchRunner to start with the default values. 
+
+CONFIG GENERATION : 
+Modify (or run) org.activequant.applications.util.FileConfigGenerator to generate config files into a target folder. 
+See code for details.
+ 
+
+
+
+
+
+
+======= scribbles following ======
+
+Optimization Config
+* Sim Config Generator (can point to an implementation that loads sim configs)
+* Quote Source (can point to some aq-series source later down the road)
+* optimization report generator
+
+Parameters for BatchSimReportWriter  
+* Chart output folder
+* Sim config output folder
+* evtl. Sim config input folder
+* OrderBook output folder
+
+
+* CsvQuoteIterator Source
