@@ -20,7 +20,7 @@
 		<menu name="Documentation">
 			<item name="Home" href="index.html" />
 			<item name="Overview" href="overview.html" />
-			<item name="Anatomy of an algo" href="algoanatomy.html" />
+			<!--item name="Anatomy of an algo" href="algoanatomy.html" /-->
 			<item name="Walkthrough" href="walkthrough.html" />
 			<item name="FAQ" href="faq.html" />
 		</menu>

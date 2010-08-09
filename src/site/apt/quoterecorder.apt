@@ -1,6 +1,6 @@
 QuoteRecorder
 
-	Quote recorder records data in the new archive format into a target folder. 
+	Quote recorder records data in the new archive format into a target folder. It loads through the instrument specification dao, the complete list of specs and compares the vendor of all specs against the vendor identifier, which can be set either in the spring configuration file or it can be left blank, in which case all loaded specs will be recorded. 
 	Per instrument id, one folder will be created, in which per day a subfolder is created. In there a file quotes.csv contains recorded quotes. 
 	Data is appended to the end of the file. 
 	
@@ -51,13 +51,13 @@ sh runQuoteRecorder.sh
 
 	The quote recorder saves all quotes to a specific target folder, which can be specified in the corresponding spring configuration file, in the quote recorder dao section:
 
-____
+----
 <bean id="quoteArchiveDao" class="org.activequant.util.RecorderQuoteDao">
 	<constructor-arg>
         <value>/home/share/archive</value>
         </constructor-arg>
 </bean>
-____ 
+---- 
 
 	The good thing is that the modularity of spring and the way ActiveQuant is written, allows you to plug in any other QuoteDao, you can easily implement your own recorder to save to a specific custom file format or even to FTP if you like. A database recorder dao is shipped in ActiveQuant. 
 

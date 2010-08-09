@@ -1,11 +1,10 @@
 Archive Format
 
-  The data archive can contain both candles and quotes. They are stored as plain text files in CSV format on disc. They are organized in a two level deep folder structure, where the first folder is the instrument id and the second folder is the date. In the date folder reside a "quotes.csv" and "candles_XX.csv" files, which contain the actual data. 
+	The data archive can contain both candles and quotes. They are stored as plain text files in CSV format on disc. They are organized in a two level deep folder structure, where the first folder is the instrument id and the second folder is the date. In the date folder reside a "quotes.csv" and "candles_XX.csv" files, which contain the actual data. 
 
+	An example of a quotes.csv file looks like this: 
 
-  An example of a quotes.csv file looks like this: 
-
-____
+----
 1281360730430000000;110200.0;15.0;111875.0;15.0;
 1281360859784000000;110100.0;15.0;111875.0;15.0;
 1281360882796000000;110100.0;15.0;111775.0;15.0;
@@ -27,7 +26,8 @@ ____
 1281362116516000000;109700.0;15.0;111475.0;15.0;
 1281362199077000000;109700.0;15.0;111375.0;15.0;
 1281362266480000000;109700.0;15.0;111475.0;15.0;
-____
+----
+
 
   The content is: timestamp in nanoseconds; bid price;bid volume; ask price; ask volume. Future versions could contain the full book behind these fields. 
 
