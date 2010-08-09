@@ -4,6 +4,8 @@ QuoteRecorder
 	Per instrument id, one folder will be created, in which per day a subfolder is created. In there a file quotes.csv contains recorded quotes. 
 	Data is appended to the end of the file. 
 	
+	The following xml snipplets are from the quoterecorder.xml configuration file. 
+
 	By default it uses the JMS data source: 
 
 ----
@@ -46,3 +48,16 @@ TO BE ADDED.
 ----
 sh runQuoteRecorder.sh
 ----	
+
+	The quote recorder saves all quotes to a specific target folder, which can be specified in the corresponding spring configuration file, in the quote recorder dao section:
+____
+<bean id="quoteArchiveDao" class="org.activequant.util.RecorderQuoteDao">
+	<constructor-arg>
+        <value>/home/share/archive</value>
+        </constructor-arg>
+</bean>
+____ 
+
+	The good thing is that the modularity of spring and the way ActiveQuant is written, allows you to plug in any other QuoteDao, you can easily implement your own recorder to save to a specific custom file format or even to FTP if you like. A database recorder dao is shipped in ActiveQuant. 
+
+
