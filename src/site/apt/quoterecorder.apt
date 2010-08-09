@@ -50,6 +50,7 @@ sh runQuoteRecorder.sh
 ----	
 
 	The quote recorder saves all quotes to a specific target folder, which can be specified in the corresponding spring configuration file, in the quote recorder dao section:
+
 ____
 <bean id="quoteArchiveDao" class="org.activequant.util.RecorderQuoteDao">
 	<constructor-arg>

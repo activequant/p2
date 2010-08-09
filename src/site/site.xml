@@ -10,6 +10,7 @@
 	<poweredBy>
 		<logo name="ActiveQuant rules!" href="http://activequant.org"
 			img="images/activequant_rules.gif" />
+ 	        <logo name="Spring Framework" href="http://www.springframework.org" img="http://www.springdeveloper.com/images/powered-by-spring.png"/>
 	</poweredBy>
 	<body>
 		<links>
