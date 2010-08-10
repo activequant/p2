@@ -18,5 +18,7 @@ The AlgoEnvironment
 	The algo environment configuration is injected into the algo environment upon start. 
 
 
+The report hook
 
+	Every trade system implementation has to implement the _populateReport_ method. At some time, the environment, in which a trade system runs, will call this method so that the trade system has a chance to contribute values to a report. A typical example of when this method is called is after a simulation run. As examples, the trade system could save the number of signals it generated, the quotes it processed, etc. 
 
