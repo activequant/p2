@@ -17,19 +17,8 @@ import org.activequant.util.tempjms.JMSQuoteSubscriptionSource;
 import org.activequant.util.tools.UniqueDateGenerator;
 
 /**
- * A very simple data cache server for text messages as received from a jms
- * server. It exposes a simple http interface to retrieve the data. <br>
- * Parameters are:<br>
- * lines=XYZ, where XYZ is a number. This parameter specifies the amount of past
- * lines that should be fetched<br>
- * channel=XYZ, where XYZ is a channel identifier. This parameter specifies the
- * for which channel the history should be fetched. <br>
- * An example looks like this : <br>
- * GET /?lines=1000&channel=DAX<br>
- * Description see http://activequant.org/blogs/show/2<br>
- * 
- * http://localhost:56765/?dataType=candles&timeframe=1m&channel=43
- * 
+ * A very simple recorder for candles. It subscribes to quotes for all known instrument specifications and candleizes these. 
+ * These candles are stored through a CandleDao, for example RecorderCandleDao. 
  * <p>
  * History: <br> - [27.09.2009] Created (Ulrich Staudinger)<br>
  * 
