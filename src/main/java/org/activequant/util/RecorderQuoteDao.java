@@ -18,6 +18,9 @@ import org.activequant.util.exceptions.NotImplementedException;
 
 public class RecorderQuoteDao implements IQuoteDao{
 
+	private HashMap<String, File> fileHash = new HashMap<String, File>();
+	private HashMap<String, BufferedWriter> writerHash = new HashMap<String, BufferedWriter>();
+
 	/**
 	 * stores the files in a hashmap. 
 	 */
@@ -37,7 +40,10 @@ public class RecorderQuoteDao implements IQuoteDao{
 	
 	private File getFile(Integer instrumentId, Date date)
 	{
-		
+
+		String fileName = baseFolder + File.separator+instrumentId.toString()+File.separator+iso8601date.format(date)+File.separator+"quotes.csv";
+		System.out.println("** New file ");
+		if(fileHash.containsKey(fileName))return fileHash.get(fileName);
 		// check for the folders ... 
 		if(!new File(baseFolder).exists())
 		{
@@ -53,17 +59,28 @@ public class RecorderQuoteDao implements IQuoteDao{
 		}
 			
 		// have to instantiate that file.
-		File file = new File(baseFolder + File.separator+instrumentId.toString()+File.separator+iso8601date.format(date)+File.separator+"quotes.csv");
+		File file = new File(fileName);
+		fileHash.put(fileName, file);
 		return file;
 	}
 	
 	private BufferedWriter getWriter(Integer instrumentId, Date date) throws IOException
 	{
 		final String key = instrumentId.toString() + iso8601date.format(date);
+		if(writerHash.containsKey(key))return writerHash.get(key);
 		BufferedWriter bw = new BufferedWriter(new FileWriter(getFile(instrumentId, date),true));
+		writerHash.put(key, bw);
 		return bw; 
 	}
 	
+	private void releaseWriter(BufferedWriter bw) throws IOException 
+	{
+		bw.flush();
+		//bw.close();
+	}	
+
+
+
 	
 	@Override
 	public void deleteByInstrumentSpecification(InstrumentSpecification instrumentSpecification) throws DaoException {
@@ -150,7 +167,7 @@ public class RecorderQuoteDao implements IQuoteDao{
 			bw.write(Double.toString(entity.getAskQuantity()));
 			bw.write(";");
 			bw.newLine();
-			bw.flush();
+			releaseWriter(bw);
 			System.out.print(".");
 		} catch (IOException e) {
 			throw new DaoException(e);
