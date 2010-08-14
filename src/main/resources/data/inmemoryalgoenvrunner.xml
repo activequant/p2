@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+
+    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+        <property name="beans">
+            <map>
+                <entry key="bean:name=runner" value-ref="runner"/>
+            </map>
+        </property>
+        <property name="registrationBehaviorName" value="REGISTRATION_REPLACE_EXISTING"/>
+    </bean>
+    
+    <bean id="jmsConnection" class="org.activequant.util.tempjms.JMS">
+    	
+	    <constructor-arg>	    	
+	    		<value>192.168.0.177</value>	  	
+	    </constructor-arg>
+	     <constructor-arg>
+	      		<value>7676</value>	
+	    </constructor-arg>
+    </bean>
+
+    <bean id="runner" class="org.activequant.production.InMemoryAlgoEnvConfigRunner">	   
+	    <constructor-arg>
+	      		<value>/home/share/logs/log1.txt</value>	
+	    </constructor-arg>
+	    <constructor-arg>
+	    	<ref bean="jmsConnection"/>
+	    </constructor-arg>
+    </bean>
+
+</beans>

@@ -1,0 +1,10 @@
+Random Data Generator
+
+
+	The random data generator is a generic tool to generate random quotes for three instruments. All quotes are published in the AQ specific format to the JMS connection configured in the spring configuration files (see src/main/resources/inmemoryalgoenvrunner.xml). The three instruments are called Random1, Random2, Random3. Upon start, the application will load these instruments from a database and if not present, these will be generated and saved in the database.
+
+	Quotes are emitted at intervalls of (rnd() * 1000 + 10) milliseonds, so, somewhere between 0.01 and 1.01 seconds between quotes. 
+
+	A plain start script for the random data generator is shipped in the main folder of p2. 
+
+	

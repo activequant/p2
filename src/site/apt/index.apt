@@ -2,6 +2,7 @@ AQP2
 
    	Welcome to ActiveQuant P2. AQP2 is one possible realisation of a backtesting and production trading 
    	environment. It uses the activequant framework and its descendends to achieve outstanding results.
-   	
+
+	AQP2 is heavily built around a JMS messaging system and thus, it is handy to have a JMS server installed. However, it is also possible to plug in IB trading support, as the underlying ActiveQuant framework supports it very well.    	
    	  
    	

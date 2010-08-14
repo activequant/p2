@@ -44,7 +44,6 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 
 	@Override
 	public void onQuote(Quote quote) {
-		System.out.print(".");
 		double currentPosition = 0.000;
 		if (getAlgoEnv().getBrokerAccount().getPortfolio().hasPosition(
 				quote.getInstrumentSpecification())) {
@@ -53,6 +52,7 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 					.getQuantity();
 		}
 
+		//System.out.println(quote.toString());
 	
 
 		if (formerQuote != null) {
@@ -63,7 +63,7 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 				return;
 		}
 		formerQuote = quote; 
-	
+
 		quoteUpdateCount++;
 		// only 100% sane quotes ...
 		if (quote.getBidPrice() == Quote.NOT_SET
@@ -92,7 +92,7 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 		close = quote.getMidpoint();
 
 		// slice ..
-		if (opens.size() > (Math.max(period1, period2) + 1)) {
+		if (opens.size() > (Math.max(period1, period2) + 2)) {
 			opens.remove(0);
 			highs.remove(0);
 			lows.remove(0);
