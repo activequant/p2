@@ -1,7 +1,7 @@
-ConfigGeneratorStub
+Config Persister
 
-	The class ConfigGeneratorStub can be used to quickly generate a simulation config or 
-	algo env config. 
+	The class ConfigPersister can be used to generate a simulation config or 
+	algo env config and to save it to disk. All parameters can be set in the java code of this class, it's length of about 30 lines makes it easy to understand and use.
 	
 	It is a very small and short utility class that uses the persistence layer to save it 
 	somewhere. 

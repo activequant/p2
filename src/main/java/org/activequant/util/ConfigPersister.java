@@ -9,7 +9,7 @@ import org.activequant.optimization.domainmodel.AlgoEnvConfig;
 import org.activequant.optimization.domainmodel.SimulationConfig;
 import org.activequant.util.tools.ArrayUtils;
 
-public class ConfigGeneratorStub {
+public class ConfigPersister {
 
 	/**
 	 * @param args
