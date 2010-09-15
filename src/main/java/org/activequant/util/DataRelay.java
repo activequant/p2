@@ -140,6 +140,8 @@ class DataRelay {
 }
 
 class WorkerThread implements Runnable {
+        protected final static Logger log = Logger.getLogger(WorkerThread.class);
+
 	WorkerThread(DataRelay aRelay, Socket aSocket) throws Exception {
 		theRelay = aRelay;
 		theSocket = aSocket;
@@ -257,6 +259,7 @@ class WorkerThread implements Runnable {
 				try { 
 					handleLine(myL);
 				} catch(Exception ex) {
+					log.warn("Exception while reading line: "+myL);		
 					ex.printStackTrace();
 				}
 				// System.out.println("[" + new Date() + "] Queue length: " + theQueue.size());
