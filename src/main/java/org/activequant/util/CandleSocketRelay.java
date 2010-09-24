@@ -180,7 +180,7 @@ public class CandleSocketRelay  {
 
 
 	public static void main(String[] args) throws Exception {
-		new RudeCandleRecorder();
+		new CandleSocketRelay();
 	}
 	
 	private int specificationId = 86; 
