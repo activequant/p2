@@ -2,6 +2,7 @@ package org.activequant.util;
 
 import java.util.*;
 import java.net.*;
+import java.io.*;
 
 import org.activequant.core.domainmodel.InstrumentSpecification;
 import org.activequant.core.domainmodel.data.Candle;
@@ -79,6 +80,7 @@ public class CandleSocketRelay  {
 						writer.writeLine(l);
 					}
 					writer.writeLine(".");
+					writer.flush();
 				}
 				catch(Exception ex)
 				{
