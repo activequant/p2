@@ -94,7 +94,7 @@ public class CandleSocketRelay  {
 		}
 	}
 
-	public RudeCandleRecorder() throws Exception {
+	public CandleSocketRelay() throws Exception {
 		// read the jms host
 		if (System.getProperties().containsKey("JMS_HOST"))
 			jmsHost = System.getProperty("JMS_HOST");
