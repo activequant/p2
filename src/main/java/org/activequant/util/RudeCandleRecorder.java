@@ -17,7 +17,8 @@ import org.activequant.util.tempjms.JMSQuoteSubscriptionSource;
 import org.activequant.util.tools.UniqueDateGenerator;
 
 /**
- * A very simple recorder for candles. It subscribes to quotes for all known instrument specifications and candleizes these. 
+ * A very simple recorder for candles. It subscribes to quotes for all known 
+ * instrument specifications and candleizes these. 
  * These candles are stored through a CandleDao, for example RecorderCandleDao. 
  * <p>
  * History: <br> - [27.09.2009] Created (Ulrich Staudinger)<br>
