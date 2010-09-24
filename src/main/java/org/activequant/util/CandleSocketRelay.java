@@ -80,7 +80,7 @@ public class CandleSocketRelay  {
 						writer.write(l);
 						writer.write("\n");
 					}
-					writer.writeLine(".");
+					writer.write(".");
 					writer.write("\n");
 					writer.flush();
 				}
