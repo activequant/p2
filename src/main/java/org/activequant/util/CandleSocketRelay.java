@@ -77,9 +77,11 @@ public class CandleSocketRelay  {
 				try{
 					for(String l : lastCandles)
 					{
-						writer.writeLine(l);
+						writer.write(l);
+						writer.write("\n");
 					}
 					writer.writeLine(".");
+					writer.write("\n");
 					writer.flush();
 				}
 				catch(Exception ex)
