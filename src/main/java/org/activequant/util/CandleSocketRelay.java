@@ -19,7 +19,8 @@ import org.activequant.util.tempjms.JMSQuoteSubscriptionSource;
 import org.activequant.util.tools.UniqueDateGenerator;
 
 /**
- * A very simple recorder and relay for candles. It subscribes to quotes for a specific instrument specification
+ * Collects data for one instrumentId, builds OHLC 1minute candles out of these and relays these over a TCP socket in CSV format to connected clients.
+ * It subscribes to quotes for a specific instrument specification
  * and candleizes these, when candleized, the last X candles are relayed over a TCP socket to subscribers.  
  * 
  * <p>
@@ -63,38 +64,55 @@ public class CandleSocketRelay  {
 		}
 	}
 	
+	final List<BufferedWriter> toBeRemoved = new ArrayList<BufferedWriter>();
+
 	class CandleAggregator implements IEventListener<Candle> {
 		@Override
 		public void eventFired(Candle event) {
 			// append the candle to the current cache. 
 			
-			lastCandles.add(event.toString());
-			if(lastCandles.size()>200)lastCandles.remove(0);
+			lastCandles.add(event.getTimeStamp().getNanoseconds()+";"+event.getOpenPrice()+";"+event.getHighPrice()
+					+";"+event.getLowPrice()+";"+event.getClosePrice()+";"+event.getVolume());
+			if(lastCandles.size()>maxCandles)lastCandles.remove(0);
 			// distribute the candle
-			List<BufferedWriter> toBeRemoved = new ArrayList<BufferedWriter>();
-			for(BufferedWriter writer : writers)
-			{	
-				try{
-					for(String l : lastCandles)
-					{
-						writer.write(l);
-						writer.write("\n");
-					}
-					writer.write(".");
-					writer.write("\n");
-					writer.flush();
-				}
-				catch(Exception ex)
+			for(final BufferedWriter writer : writers)
+			{					
+				if(!toBeRemoved.contains(writer))
 				{
-					ex.printStackTrace();
-					toBeRemoved.add(writer);
+					Runnable r = new Runnable()
+					{
+						public void run(){
+							try{
+								for(String l : lastCandles)
+								{
+									writer.write(l);
+									writer.write("\r\n");
+								}
+								writer.write(".");
+								writer.write("\r\n");
+								writer.flush();
+							}
+							catch(Exception ex)
+							{
+								//ex.printStackTrace();
+								System.out.println("Error while sending.");
+								toBeRemoved.add(writer);
+							}		
+						}
+					};
+					Thread t = new Thread(r);
+					t.start();
 				}
 			}
-			// clean out
-			for(BufferedWriter writer : toBeRemoved)
-			{
-				writers.remove(writer);
-			}
+//			// clean out
+//			for(BufferedWriter writer : toBeRemoved)
+//			{
+//				try {
+//					writers.remove(writer);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
 		}
 	}
 
@@ -120,6 +138,11 @@ public class CandleSocketRelay  {
 		else
 			tcpListenerPort = 13431; 
 		
+		if (System.getProperties().containsKey("MAX_CANDLES"))
+			maxCandles = Integer.parseInt(System.getProperty("MAX_CANDLES"));
+		else
+			maxCandles = 200;  
+		
 		initQuoteFeeds();
 	}
 
@@ -144,23 +167,34 @@ public class CandleSocketRelay  {
 		new Thread(task).start();
 		// 
 		
-		// init the tcp listeners. 
+		// init the tcp listener thread. 
 		Runnable r = new Runnable(){
 			public void run()
 			{
-				
+				ServerSocket ss = null; 
 				while(true)
 				{
 						try{
 							Thread.sleep(5000);
-							ServerSocket ss = new ServerSocket(tcpListenerPort);
-							Socket s = ss.accept();
-							BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
-							writers.add(bw);
+							ss = new ServerSocket(tcpListenerPort);
+							while(true)
+							{
+							  Socket s = ss.accept();						
+							  BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+							  writers.add(bw);
+							}
 						}
 						catch(Exception ex)
 						{
 							ex.printStackTrace();
+						}
+						finally {
+						    if(ss!=null)
+								try {
+									ss.close();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
 						}
 				}
 			}
@@ -190,6 +224,7 @@ public class CandleSocketRelay  {
 	private ISpecificationDao specDao = factoryDao.createSpecificationDao();
 	private JMSQuoteSubscriptionSource jmsQuoteSubscriptionSource;
 	private TradeIndicationToCandleConverter candleSource1Min;
+	private int maxCandles = 200; 
 	private String jmsHost = "";
 	private int jmsPort = 7676;
 	private List<String> lastCandles = new ArrayList<String>();

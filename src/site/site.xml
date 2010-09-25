@@ -29,7 +29,8 @@
 			<item name="Config Persister" href="configgenerator.html" />
 			<item name="Data Relay" href="datarelay.html" />
 			<item name="Random Quote Generator" href="datagenerator.html" />
-			<item name="Quote Recorder" href="quoterecorder.html" />									
+			<item name="Quote Recorder" href="quoterecorder.html" />
+			<item name="Candle Socket Relay" href="candlesocketrelay.html" />									
 			<item name="Candle Recorder" href="candlerecorder.html" />									
 		</menu>
 
