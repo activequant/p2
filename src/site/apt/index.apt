@@ -3,7 +3,8 @@ AQP2
    	Welcome to ActiveQuant P2. AQP2 is one possible realisation of a backtesting and production trading 
    	environment. It uses the activequant framework and its descendends to achieve outstanding results.
 
-        Join us in the AQ-P2 specific forum at http://forums.activequant.org/ !
+        {{{http://forums.activequant.org}Join us in the AQ-P2 specific forum at http://forums.activequant.org!}
+
 
         The following diagram shows a typical setup of the AQ-P2 components.
    	
