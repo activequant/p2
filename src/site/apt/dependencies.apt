@@ -1,0 +1,11 @@
+Dependencies
+
+	Depending on what you use, P2 has different requirements. 
+	
+	In principle it requires: recent JDK, Maven 2+, SVN, MySQL5+
+
+        If you want to use the QuoteRecorder, DataRelay, etc you need to have an {{{http://mq.dev.java.net}openMQ}} server available where to relay data through.
+	 
+	 
+	 
+
