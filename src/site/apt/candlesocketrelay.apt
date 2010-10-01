@@ -1,0 +1,45 @@
+Candle Socket Relay
+
+    The candle socket relay records quotes and ticks from the JMS server and converts these to candles. Converted candles are sent 
+    out over a tcp socket. Other applications, like an R based application can connect on this TCP socket and will receive the latest 
+    candles once they are sent out.  
+
+
+* Parameters
+
+    The following parameters can be passed as system properties to the CandleSocketRelay class through -D...=...
+
+----    
+JMS_HOST: Specifies the host name or IP of the JMS server to be user. Default is localhost
+JMS_PORT: Same as above, but it's just the port. Default is 7676
+SPECIFICATION_ID: Which instrument id should be recorded? Default is 86
+LISTENER_PORT: on which port should this application listens for socket connections? Default is 13431 
+MAX_CANDLES: How many candles to keep in memory, default is 200
+----
+
+
+* Communication protocol
+
+    Generated candles are relayed in a very straight forward CSV format: timestamp in nanos;open;high;low;close;volume
+    
+    End of data is signalled through a dot. 
+    
+    Example: 
+    
+----
+1285404000000000000;125.42249341263795;125.58812575354762;125.17265423006333;125.58812575354762;5600.0
+1285404060000000000;125.52646959556242;125.87095984159743;124.21995902563026;124.462004335288;10900.0
+1285404120000000000;124.37683506653032;125.04568959095286;124.128864812878;124.329102279917;11300.0
+1285404180000000000;124.3694069739485;125.79471581155795;124.36185501575969;125.54941642500647;11400.0
+1285404240000000000;125.58057594233351;125.64478802242705;124.78192463024347;124.91140752163726;9700.0
+1285404300000000000;124.93078317421815;125.18194698496124;124.31272682851657;125.16980337091222;11500.0
+.
+----          
+
+
+* Starting it
+
+
+----
+sh runCandleRelay.sh
+----	

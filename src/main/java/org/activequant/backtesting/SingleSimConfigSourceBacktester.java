@@ -14,8 +14,9 @@ import org.activequant.util.CsvArchiveQuoteSourceWrapper;
 import org.apache.log4j.Logger;
 
 /**
- * The SimConfigFileBacktester will load a simulation configuration file and simulate it. 
- * It uses the SimpleSerializer to load this application.  
+ * The SingleSimConfigFileBacktester takes an ISimConfigSource isntance and 
+ * retrieves a simulation configuration from it and simulates it. 
+ * This class does not take a file, but works fully in memory.
  * 
  * @author Ulrich Staudinger
  *
