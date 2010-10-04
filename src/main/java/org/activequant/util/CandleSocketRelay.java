@@ -54,7 +54,9 @@ public class CandleSocketRelay  {
 							conv.getSyncEventListener().eventFired(
 									uniqueDateGen.generate(System.currentTimeMillis()));
 							rerun = false; 
-						} catch(Exception ex) { localSleep(10); rerun = true; }
+							System.out.println("Sent sync.");
+							
+						} catch(Exception ex) { ex.printStackTrace(); localSleep(10); rerun = true; }
 
 					}
 				} catch (Exception anEx) {
@@ -91,6 +93,7 @@ public class CandleSocketRelay  {
 								writer.write(".");
 								writer.write("\r\n");
 								writer.flush();
+								System.out.println("Pushed "+lastCandles.size());
 							}
 							catch(Exception ex)
 							{
@@ -182,6 +185,7 @@ public class CandleSocketRelay  {
 							  Socket s = ss.accept();						
 							  BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
 							  writers.add(bw);
+							  System.out.println("New listener connected.");
 							}
 						}
 						catch(Exception ex)
@@ -216,7 +220,8 @@ public class CandleSocketRelay  {
 	public static void main(String[] args) throws Exception {
 		new CandleSocketRelay();
 	}
-	
+
+	private int quoteCount = 0; 	
 	private int specificationId = 86; 
 	private int theCacheSize = 10000;
 	private JMS jms;
