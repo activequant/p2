@@ -10,10 +10,13 @@ import javax.jms.TextMessage;
 import org.activequant.core.domainmodel.InstrumentSpecification;
 import org.activequant.core.domainmodel.data.Quote;
 
+import org.apache.log4j.Logger; 
+
 public class MessageHandler implements MessageListener {
 	
 	private InternalQuoteSubscriptionSource source; 
 	private InstrumentSpecification spec; 
+	private static Logger  logger = Logger.getLogger(MessageHandler.class);
 
 	
 	class LocalMessageHandler implements Runnable 
@@ -77,7 +80,10 @@ public class MessageHandler implements MessageListener {
 		Quote myQuote = new Quote();
 		// setting the instrument specification
 		myQuote.setInstrumentSpecification(spec);
-		
+		if(logger.isDebugEnabled()){
+			logger.debug("Parsing CSV line: "+aCsvDataLine);
+		}		
+
 		Long myTime = null;
 		String[] myDataEntries = aCsvDataLine.split(",");
 		for (String myDataEntry : myDataEntries) {

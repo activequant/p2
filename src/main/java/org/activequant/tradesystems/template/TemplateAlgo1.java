@@ -52,7 +52,7 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 					.getQuantity();
 		}
 
-		//System.out.println(quote.toString());
+		System.out.println(quote.toString());
 	
 
 		if (formerQuote != null) {

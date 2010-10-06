@@ -19,7 +19,8 @@ import org.activequant.util.tools.UniqueDateGenerator;
 
 /**
  * internal class for quote subscriptions ...
- * 
+ * ActiveQuant conformity requires to have a class for quote subscription sources ... 
+ *
  * @author ulst
  * 
  */
