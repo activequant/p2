@@ -64,14 +64,16 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 		}
 		formerQuote = quote; 
 
-		quoteUpdateCount++;
 		// only 100% sane quotes ...
 		if (quote.getBidPrice() == Quote.NOT_SET
 				|| quote.getAskPrice() == Quote.NOT_SET)
 			return;
 
+		quoteUpdateCount++;
+
 		// aggregating five quotes into one candle (non-time discrete)
 		if (quoteUpdateCount == 5) {
+			System.out.println("New OHLC dataset");
 			quoteUpdateCount = 0;
 			if (open != 0) {
 				lows.add(low);
@@ -115,7 +117,10 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 		Collections.reverse(closes);
 		// log.info("Opens: " + opens.size());
 		if (opens.size() < (Math.max(period1, period2) + 1))
+		{
+			System.out.println("Need "+ (Math.max(period1, period2)+1 - opens.size())+ " additional OHLCs.");
 			return;
+		}
 
 		double p1 = FinancialLibrary2.WMA(period1, closesArray, 0);
 		double p2 = FinancialLibrary2.WMA(period2, closesArray, 0);
