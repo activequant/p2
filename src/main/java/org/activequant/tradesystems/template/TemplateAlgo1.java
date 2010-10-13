@@ -52,7 +52,7 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 					.getQuantity();
 		}
 
-		System.out.println(quote.toString());
+		System.out.print(".");
 	
 
 		if (formerQuote != null) {
@@ -127,7 +127,7 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 
 		double mp = quote.getMidpoint();
 
-		System.out.printf("(%s) MP: %f, WMA1: %f, WMA2: %f\n", new Date().toString(), mp, p1, p2);
+		System.out.printf("(%s) \tBid/Ask: %f/%f \tMP: %f \tWMA1: %f \tWMA2: %f\n", new Date().toString(), quote.getBidPrice(), quote.getAskPrice(), mp, p1, p2);
 		
 
 	}
