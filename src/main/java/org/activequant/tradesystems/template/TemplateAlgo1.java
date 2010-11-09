@@ -18,6 +18,7 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 	private List<Quote> quoteList = new ArrayList<Quote>();
 	private Quote formerQuote;
 	private int period1, period2; 
+	private double mpOld, p1Old, p2Old; 
 	
 
 	private List<Double> lows = new ArrayList<Double>();
@@ -62,6 +63,7 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 							.getAskPrice() == Quote.NOT_SET))
 				return;
 		}
+		System.out.print("+");
 		formerQuote = quote; 
 
 		// only 100% sane quotes ...
@@ -92,6 +94,9 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 		if (quote.getMidpoint() < low)
 			low = quote.getMidpoint();
 		close = quote.getMidpoint();
+
+		if(quoteUpdateCount!=5) 
+			return;
 
 		// slice ..
 		if (opens.size() > (Math.max(period1, period2) + 2)) {
@@ -126,9 +131,24 @@ public class TemplateAlgo1 extends BasicTradeSystem {
 		double p2 = FinancialLibrary2.WMA(period2, closesArray, 0);
 
 		double mp = quote.getMidpoint();
+		String crossing1 = ""; 
+		String crossing2 = ""; 
+		if(p1>0.0)
+		{
+			if(p1>p2 && p1Old < p2Old)
+			{
+				crossing1 = "LONG";
+			}
+			else if(p1<p2 && p1Old>p2Old)
+			{
+				crossing1 = "SHORT";
+			}
+		}	
 
-		System.out.printf("(%s) \tBid/Ask: %f/%f \tMP: %f \tWMA1: %f \tWMA2: %f\n", new Date().toString(), quote.getBidPrice(), quote.getAskPrice(), mp, p1, p2);
-		
+		System.out.printf("\n(%s) \tBid/Ask: %f/%f \tMP: %f \tWMA1: %f \tWMA2: %f\tC1: %s\n", new Date().toString(), quote.getBidPrice(), quote.getAskPrice(), mp, p1, p2, crossing1);
+		mpOld = mp; 
+		p1Old = p1; 
+		p2Old = p2; 	
 
 	}
 

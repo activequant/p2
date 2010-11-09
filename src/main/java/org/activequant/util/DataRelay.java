@@ -77,8 +77,8 @@ class DataRelay {
 	}
 
 	private void startListenerSocket() throws Exception {
-		System.out.println("Settings: ");
-		System.out.println("ListnerPort " + theListenerPort);
+		log.info("Settings: ");
+		log.info("ListnerPort " + theListenerPort);
 		ServerSocket listenerSocket = new ServerSocket(theListenerPort);
 		Socket mySocket;
 		while (!quit) {
@@ -113,7 +113,7 @@ class DataRelay {
 
 		String myKey = aSymbol + anExchange + aCurrency;
 		if (!theSpecCache.containsKey(myKey)) {
-			System.out.println("Resolving " + aSymbol + "/" + anExchange);
+			log.info("Resolving " + aSymbol + "/" + anExchange);
 			// fetch the key ..
 			InstrumentSpecification myExampleSpec = new InstrumentSpecification();
 			myExampleSpec.setSymbol(new Symbol(aSymbol));
@@ -131,7 +131,7 @@ class DataRelay {
 			}
 
 			theSpecCache.put(myKey, spec);
-			System.out.println("Resolved instrument to id " + spec.getId());
+			log.info("Resolved instrument to id " + spec.getId());
 		}
 		return theSpecCache.get(myKey);
 
@@ -148,17 +148,24 @@ class WorkerThread implements Runnable {
 	}
 
 	private MessageProducer getProducer(String aTopic) throws Exception {
+		log.debug("getting mp");
 		if (!theProducers.containsKey(aTopic)) {
 			theProducers.put(aTopic, theRelay.getJms().getMessageProducer().createPublisher(
 					theRelay.getJms().getMessageProducer().createTopic(aTopic)));
-			System.out.println("Creating new producer for topic "+aTopic);
+			log.info("Creating new producer for topic "+aTopic);
 		}
+		log.debug("returning mp");
 		return theProducers.get(aTopic);
 	}
 
 	private TextMessage getTextMessage(String aTopic) throws Exception {
+		log.debug("getting text message.");
 		if (!theMessages.containsKey(aTopic))
+		{
 			theMessages.put(aTopic, theRelay.getJms().getMessageProducer().createTextMessage());
+		
+		}	
+		log.debug("Returning text message.");
 		return theMessages.get(aTopic);
 
 	}
@@ -184,8 +191,11 @@ class WorkerThread implements Runnable {
 	}
 
 	private void handleTick(String[] parts) throws Exception {
+		try
+		{
 		long nanoseconds = Long.parseLong(parts[1]);
 		String[] myInstrumentParts = parts[2].split(",");
+		log.debug("New tick: "+parts[2]);
 
 		double tradedPrice = Double.parseDouble(parts[3]);
 		double tradedVolume = Double.parseDouble(parts[4]);
@@ -198,12 +208,18 @@ class WorkerThread implements Runnable {
 				myInstrumentParts[3]));
 		// hardcore avoid for now.
 		// theTickPublisher.publish(myTick);
-		theRelay.increaseTickCount();
+		//theRelay.increaseTickCount();
+			log.debug("Quote parsed.");
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 
 	private void handleQuote(String[] parts) throws Exception {
-		System.out.print(".");
 		try {
+			log.debug("New quote: "+parts[2]);
 			long nanoseconds = Long.parseLong(parts[1]);
 			String[] myInstrumentParts = parts[2].split(",");
 			double bidPrice = Double.parseDouble(parts[3]);
@@ -227,13 +243,15 @@ class WorkerThread implements Runnable {
 					+ myTopic + "/ASKVOL=" + myQuote.getAskQuantity()
 
 			);
+			log.debug("Getting text message.");
 			TextMessage myMessage = getTextMessage(myTopic);
 			myMessage.setText(myLine);
+			log.debug("Pushing text message.");
 			getProducer(myTopic).send(myMessage);
-
+			log.debug("Message published.");
 			// theQuotePublisher.publish(myQuote);
 		} catch (Exception anEx) {
-			System.out.println(getString(parts));
+			log.warn(getString(parts));
 			anEx.printStackTrace();
 		}
 	}
@@ -254,7 +272,7 @@ class WorkerThread implements Runnable {
 			Thread myTh = new Thread(myT);
 			myTh.start();
 			while (true) {
-			
+				log.debug("Taking line ...");	
 				String myL = theQueue.take();
 				try { 
 					handleLine(myL);
@@ -284,6 +302,7 @@ class WorkerThread implements Runnable {
 class ReadThread implements Runnable {
 	WorkerThread theWorkerThread;
 	BufferedReader myBr;
+        protected final static Logger log = Logger.getLogger(ReadThread.class);
 
 	public void run() {
 		try {
@@ -291,11 +310,14 @@ class ReadThread implements Runnable {
 				String l = "";
 				l = myBr.readLine();
 				while (l != null) {
+					log.debug("Putting line.");
 					theWorkerThread.theQueue.put(l);
+					log.debug("Reading line.");
 					l = myBr.readLine();
 				}
 			}
 		} catch (Exception anEx) {
+			log.warn(""+anEx);
 			anEx.printStackTrace();
 		}
 
