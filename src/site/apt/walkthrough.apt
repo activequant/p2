@@ -1,6 +1,3 @@
-	<<Note in advance>>: <P2 requires in its default configuration state an active internet connection, as it will load instrument specifications from the master database. 
-	Of course this can be changed, but is out of the scope of this document.> 
-
 Backtesting an individual configuration 
 
 * Generating a SimulationConfig
@@ -93,7 +90,7 @@ Running a config in production
     
 * Generating an AlgoEnvConfig
 
-	Modify the class "ConfigGeneratorStub", as you know already, in there we have some parameter settings. Modify these parameter settings to match your good configuration. 
+	Modify the class "ConfigPersister", as you know already, in there we have some parameter settings. Modify these parameter settings to match your good configuration. 
 	Of course it is easy to imagine that you can obtain good parameters from a different source or process. 
 	
 	For now, replace
@@ -115,7 +112,7 @@ Running a config in production
 	Production requires an AlgoEnvConfig.
 
 
-	Now run the ConfigGeneratorStub again, as a result you'll have a config file with id 100 in algoconfigs.
+	Now run the ConfigPersister again, as a result you'll have a config file with id 100 in algoconfigs.
 
 * Running it in Production
 
@@ -144,6 +141,7 @@ Running a config in production
 	... to your values. The third argument is the place of the log file. 
 	
 	Now start AlgoEnvConfigRunner and watch the log file, tail on linux is a good candidate. 
-	
+
+	Mind that you will need a data source attached to the JMS server. Check the random quotes generator of P2, it generates quotes for three instruments (AQID 107,108,109). The configuration file has to be modified to point to the instrument IDs (IIDs). 
 	
 	t.   	

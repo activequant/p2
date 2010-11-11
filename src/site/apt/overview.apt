@@ -102,7 +102,7 @@ new BatchRunner().batchRun(bc);
  
 ** Generate an AlgoEnvConfig file
 
-	Use org.activequant.util.ConfigGeneratorStub to generate a specific algoEnvConfig file or a 
+	Use org.activequant.util.ConfigPersister to generate a specific algoEnvConfig file or a 
 	SimConfig file. The user has to modify the source code of ConfigGeneratorStub to generate a 
 	file of his choice. 
 
@@ -127,20 +127,3 @@ public static void main(String[] args) throws Exception {
 
 	You can also access through JMX / jconsole the current trading process. At the moment only a few methods are exposed, namely method to get the current pnl and a string representation of the current positions. 
 
-Utilities here and there
-
-* DataRelay
-
-	Relays data from a telnet socket to JMS, more details are available in the {{{datarelay.html}DataRelay documentation}}.
-
-* QuoteRecorder
-	
-	Records data into the new archive format, one folder per instrument specification id, one subfolder per date, several data files depending on the data type.
-	 
-	Details are available in the {{{quoterecorder.html}QuoteRecorder documentation}}.
-
-* GUI
-
-	Propably the most user friendly utility in this application suite is the GUI. This part resembles the control center for simulating configurations as well as running trade systems. It is not possible to start optimizations from this application. 	
-
- 
