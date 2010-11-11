@@ -2,17 +2,17 @@ Backtesting an individual configuration
 
 * Generating a SimulationConfig
 
-    Open the class "ConfigGeneratorStub". Have a quick look at it, by default 
+    Open the class "ConfigPersister". Have a quick look at it, by default 
     it generates a SimulationConfig file for the Vlx algorithm. The ID of this 
-    file is 100. 
+    SimConfig file will be 100. 
     
-    Next, run it. The following lines specify where a SimulationConfig is written to. 
+    The following lines specify where a SimulationConfig is written to. 
     
 ----
     t.save("./src/main/resources/algoconfigs", simConfig.getId(), simConfig);
 ----
 
-	It will then generate a file 100 in the specified folder.     
+        In case you are fine with the location, run the persister. It will then generate a file 100 in the specified folder.     
 
 * Simulating a SimulationConfig    
 
