@@ -101,7 +101,7 @@ class DataRelay {
 		theTickCount++;
 	}
 
-	public int getTheListenerPort() {
+	public int getListenerPort() {
 		return theListenerPort;
 	}
 
@@ -206,10 +206,16 @@ class WorkerThread implements Runnable {
 		myTick.setQuantity(tradedVolume);
 		myTick.setInstrumentSpecification(theRelay.getSpec(myInstrumentParts[0], myInstrumentParts[1], myInstrumentParts[2],
 				myInstrumentParts[3]));
-		// hardcore avoid for now.
-		// theTickPublisher.publish(myTick);
-		//theRelay.increaseTickCount();
-			log.debug("Quote parsed.");
+		String myTopic = getTopicName(myTick.getInstrumentSpecification());
+		String line = ("TIME="+System.currentTimeMillis()+",MAIN/"+myTopic+"/PRICE="+tradedPrice+",MAIN/"+myTopic+"/VOLUME="+tradedVolume);
+			TextMessage myMessage = getTextMessage(myTopic);
+			myMessage.setText(line);
+			log.debug("Pushing text message.");
+			getProducer(myTopic).send(myMessage);
+			// hardcore avoid for now.
+			// theTickPublisher.publish(myTick);
+			//theRelay.increaseTickCount();
+			log.debug("Tick published");
 		}
 		catch(Exception ex)
 		{
@@ -240,9 +246,7 @@ class WorkerThread implements Runnable {
 			String myTopic = getTopicName(myQuote.getInstrumentSpecification());
 			String myLine = ("TIME=" + System.currentTimeMillis() + ",MAIN/" + myTopic + "/BID=" + myQuote.getBidPrice() + ",MAIN/"
 					+ myTopic + "/ASK=" + myQuote.getAskPrice() + ",MAIN/" + myTopic + "/BIDVOL=" + myQuote.getBidQuantity() + ",MAIN/"
-					+ myTopic + "/ASKVOL=" + myQuote.getAskQuantity()
-
-			);
+					+ myTopic + "/ASKVOL=" + myQuote.getAskQuantity());
 			log.debug("Getting text message.");
 			TextMessage myMessage = getTextMessage(myTopic);
 			myMessage.setText(myLine);

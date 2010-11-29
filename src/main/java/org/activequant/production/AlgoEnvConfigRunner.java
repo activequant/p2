@@ -91,7 +91,7 @@ public class AlgoEnvConfigRunner extends AlgoEnvBase implements
 			InstrumentSpecification spec = specDao.find(algoEnvConfig.getInstruments().get(i)); 
 			specs.add(spec);
 			//
-			MessageHandler handler = new MessageHandler((InternalQuoteSubscriptionSource)quoteSubscriptionSource, spec);			
+			MessageHandler handler = new MessageHandler((InternalQuoteSubscriptionSource)quoteSubscriptionSource, null, spec);			
 			jmsConnection.subscribeMessageHandler(jmsConnection.getTopicName(spec), handler);
 		}
 

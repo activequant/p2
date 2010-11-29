@@ -9,12 +9,14 @@ import javax.jms.TextMessage;
 
 import org.activequant.core.domainmodel.InstrumentSpecification;
 import org.activequant.core.domainmodel.data.Quote;
+import org.activequant.core.domainmodel.data.TradeIndication;
 
 import org.apache.log4j.Logger; 
 
 public class MessageHandler implements MessageListener {
 	
-	private InternalQuoteSubscriptionSource source; 
+	private InternalQuoteSubscriptionSource source1; 
+	private InternalTradeIndicationSubscriptionSource source2;
 	private InstrumentSpecification spec; 
 	private static Logger  logger = Logger.getLogger(MessageHandler.class);
 
@@ -44,19 +46,17 @@ public class MessageHandler implements MessageListener {
 					TextMessage textMessage = (TextMessage) message;
 					String text = textMessage.getText();
 					parse(text);				
-				}
-				
-
-			} catch (Exception jmse) {
-			
+				}				
+			} catch (Exception jmse) {			
 				jmse.printStackTrace();
 			}
 		}
 	}
 	
-	public MessageHandler(InternalQuoteSubscriptionSource source, InstrumentSpecification spec)
+	public MessageHandler(InternalQuoteSubscriptionSource source1, InternalTradeIndicationSubscriptionSource source2, InstrumentSpecification spec)
 	{
-		this.source = source; 
+		this.source1 = source1; 
+		this.source2 = source2; 
 		this.spec = spec; 
 		Thread myT = new Thread(new LocalMessageHandler());
 		myT.start(); 
@@ -77,13 +77,34 @@ public class MessageHandler implements MessageListener {
 	 */
 	public void parse(String aCsvDataLine) {
 
+		if(aCsvDataLine.indexOf("BID")!=-1)
+		{
+
+			handleQuoteLine(aCsvDataLine);
+		}
+		else if(aCsvDataLine.indexOf("PRICE")!=-1)
+		{
+			handleTickLine(aCsvDataLine);
+		}
+
+
+		
+	}
+
+	private void handleTickLine(String aCsvDataLine)
+	{
+
+	}
+	
+	private void handleQuoteLine(String aCsvDataLine)
+	{
+
 		Quote myQuote = new Quote();
 		// setting the instrument specification
 		myQuote.setInstrumentSpecification(spec);
 		if(logger.isDebugEnabled()){
 			logger.debug("Parsing CSV line: "+aCsvDataLine);
 		}		
-
 		Long myTime = null;
 		String[] myDataEntries = aCsvDataLine.split(",");
 		for (String myDataEntry : myDataEntries) {
@@ -123,10 +144,11 @@ public class MessageHandler implements MessageListener {
 		}
 		if(myQuote.getBidPrice()!=Quote.NOT_SET)
 		{
-			source.distributeQuote(myQuote);
+			source1.distributeQuote(myQuote);
 		}
-		
+
 	}
+
 	
 	/**
 	 * the on message function, this message is called from jms once a message

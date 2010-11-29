@@ -39,12 +39,12 @@
 		</contributor>
 	</contributors>
 	<scm>
-		<connection> scm:svn:svn://activequant.org/opt/repositories/hidden/p2 
+		<connection> scm:svn:svn://activequant.org/opt/repositories/hidden/trunk/p2 
 		</connection>
 		<developerConnection>
-			scm:svn:svn://activequant.org/opt/repositories/hidden/p2 
+			scm:svn:svn://activequant.org/opt/repositories/hidden/trunk/p2 
 		</developerConnection>
-		<url>http://activequant.org/svn/hidden/p2</url>
+		<url>http://activequant.org/svn/hidden/trunk/p2/</url>
 	</scm>
 	<licenses>
 		<license>
@@ -309,6 +309,11 @@
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
 			<version>2.1_3</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.baulsupp.kolja</groupId>
+		    <artifactId>jcurses</artifactId>
+		    <version>0.9.5.3</version>
 		</dependency>
 	</dependencies>
 </project>

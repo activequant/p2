@@ -23,7 +23,7 @@ public class JMSQuoteSubscriptionSource implements IQuoteSubscriptionSource {
 
 	@Override
 	public ISubscription<Quote> subscribe(InstrumentSpecification spec) throws Exception {
-		MessageHandler handler = new MessageHandler(internalQuoteSubscriptionSource, spec);
+		MessageHandler handler = new MessageHandler(internalQuoteSubscriptionSource, null, spec);
 		jms.subscribeMessageHandler("AQID"+spec.getId(), handler);		
 		return internalQuoteSubscriptionSource.subscribe(spec);		
 	}

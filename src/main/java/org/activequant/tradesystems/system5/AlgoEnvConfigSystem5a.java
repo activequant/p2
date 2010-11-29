@@ -8,14 +8,14 @@ import org.activequant.optimization.domainmodel.AlgoConfig;
 import org.activequant.optimization.domainmodel.AlgoEnvConfig;
 import org.activequant.util.tools.ArrayUtils;
 
-public class AlgoEnvConfigSystem5 extends AlgoEnvConfig {
+public class AlgoEnvConfigSystem5a extends AlgoEnvConfig {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public AlgoEnvConfigSystem5()
+	public AlgoEnvConfigSystem5a()
 	{
 		List<Tuple<Integer, Integer>> startStopTimes = new ArrayList<Tuple<Integer, Integer>>();
 		// UTC !!!
@@ -24,7 +24,7 @@ public class AlgoEnvConfigSystem5 extends AlgoEnvConfig {
 		
 		// set, to which instrument to subscribe to. 
 		// local instrument id, can differ across machines. 
-		setInstruments(ArrayUtils.asList(new Integer[] { 86 }));
+		setInstruments(ArrayUtils.asList(new Integer[] { 85 }));
 		
 		// create algo config and set it. 
 		AlgoConfig ac = new AlgoConfig();

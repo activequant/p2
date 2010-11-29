@@ -101,7 +101,7 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 			InstrumentSpecification spec = specDao.find(algoEnvConfig.getInstruments().get(i)); 
 			specs.add(spec);
 			// wire quote subscription source and jms source. Very dirty, i know. 
-			MessageHandler handler = new MessageHandler((InternalQuoteSubscriptionSource)quoteSubscriptionSource, spec);			
+			MessageHandler handler = new MessageHandler((InternalQuoteSubscriptionSource)quoteSubscriptionSource, null, spec);			
 			jmsConnection.subscribeMessageHandler(jmsConnection.getTopicName(spec), handler);
 		}
 

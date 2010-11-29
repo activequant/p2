@@ -4,30 +4,50 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.io.BufferedWriter; 
+import java.io.FileWriter; 
 
 import org.activequant.container.report.SimpleReport;
 import org.activequant.core.domainmodel.data.Quote;
 import org.activequant.optimization.domainmodel.AlgoConfig;
 import org.activequant.tradesystems.AlgoEnvironment;
 import org.activequant.tradesystems.BasicTradeSystem;
+import org.activequant.math.algorithms.EMAAccumulator;
 import org.activequant.util.FinancialLibrary2;
 import org.activequant.util.tools.ArrayUtils;
+import org.activequant.util.messaging.jabber.JabberMessenger;
+import org.activequant.util.RecorderCandleDao;
+import org.activequant.core.domainmodel.InstrumentSpecification;
+import org.activequant.core.domainmodel.data.Candle;
+import org.activequant.core.types.TimeFrame;
+import org.activequant.core.types.TimeStamp;
+import org.apache.log4j.Logger;
+import org.jivesoftware.smack.XMPPConnection; 
+import org.jivesoftware.smackx.muc.MultiUserChat;
 
 public class System5 extends BasicTradeSystem {
 
 	private List<Quote> quoteList = new ArrayList<Quote>();
 	private Quote formerQuote;
-	private int period1, period2; 
+	private int period1; 
 	private double mpOld, p1Old, p2Old; 
 	private int formerDirection = 0; 
+
+        protected final static Logger log = Logger.getLogger(System5.class);
 	
 
 	private List<Double> lows = new ArrayList<Double>();
 	private List<Double> highs = new ArrayList<Double>();
 	private List<Double> opens = new ArrayList<Double>();
 	private List<Double> closes = new ArrayList<Double>();
+	BufferedWriter candleWriter;
+	private RecorderCandleDao candleDao; 
+	private EMAAccumulator emaAcc = new EMAAccumulator();
 
-	private double open, high, low, close;
+	private double open, high, low = Double.MAX_VALUE, close;
+	private JabberMessenger jm;
+	private XMPPConnection con; 
+	private MultiUserChat muc; 
 
 	int formerPosition = 0;
 
@@ -38,12 +58,62 @@ public class System5 extends BasicTradeSystem {
 	@Override
 	public boolean initialize(AlgoEnvironment algoEnv, AlgoConfig algoConfig) {
 		super.initialize(algoEnv, algoConfig);
-		period1 = 5; 
+		try{
+//			jm =  new JabberMessenger("ustaudinger@activequant.org", "eX13Zy18");
+// 			jm.connect();
+//			jm.sendMessage("uls@jabber.org", "System5 coming up", "System 5 is initializing. Good luck. ");		
+			candleDao = new RecorderCandleDao("/home/share/archive");
+			con = new XMPPConnection("activequant.org");
+			con.connect();
+			con.login("ustaudinger", "eX13Zy18");
+			muc = new MultiUserChat(con, "system5@conference.activequant.org");
+			muc.join("system5");
+			silentSend("", "", "System 5 is coming up.");
+			// initialize the candle stream writer
+			candleWriter = new BufferedWriter(new FileWriter("candles.csv")); 
+			
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			return false;
+		}
+		period1 = 10; 
+		emaAcc.setPeriod(period1);
 		return true;
+	}
+
+	private void silentSend(String to, String subj, String msg)
+	{
+		try{
+			// jm.sendMessage(to, subj, msg);
+			muc.sendMessage(msg);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+
+	private void silentWriteCandle(InstrumentSpecification spec, double open, double high, double low, double close, double ema)
+	{
+		try{
+			candleWriter.write(System.currentTimeMillis()+";"+open+";"+high+";"+low+";"+close+";"+ema+"\n");
+			candleWriter.flush();
+			Candle c = new Candle(spec, new TimeStamp(new Date()), open, high, low, close, 0.0, TimeFrame.TIMEFRAME_1_TICK);
+			candleDao.update(c);
+		}
+		catch(Exception ex){
+			ex.printStackTrace();
+		}		
+
 	}
 
 	@Override
 	public void onQuote(Quote quote) {
+		// check if it is the first quote we receive. 
+		if(open==0.0)
+			open = quote.getMidpoint();
 		double currentPosition = 0.000;
 		if (getAlgoEnv().getBrokerAccount().getPortfolio().hasPosition(
 				quote.getInstrumentSpecification())) {
@@ -52,7 +122,6 @@ public class System5 extends BasicTradeSystem {
 					.getQuantity();
 		}
 
-		// System.out.print(".");
 	
 
 		if (formerQuote != null) {
@@ -62,7 +131,9 @@ public class System5 extends BasicTradeSystem {
 							.getAskPrice() == Quote.NOT_SET))
 				return;
 		}
-		System.out.print("+");
+		log.info("New quote: "+quote.toString());
+
+		System.out.print("\n"+quote.getBidPrice()+"/"+quote.getAskPrice()+" ");
 		formerQuote = quote; 
 
 		// only 100% sane quotes ...
@@ -77,31 +148,38 @@ public class System5 extends BasicTradeSystem {
 
 		// aggregating five quotes into one candle (non-time discrete)
 		if (quoteUpdateCount == 10) {
-			System.out.println("New OHLC dataset");
 			quoteUpdateCount = 0;
-			if (open != 0) {
+			if (open > 0) {
 				lows.add(low);
 				opens.add(open);
 				highs.add(high);
 				closes.add(close);
 			}
+			emaAcc.accumulate(close);
+			silentWriteCandle(quote.getInstrumentSpecification(), open, high, low, close, emaAcc.getMeanValue());
+			log.info("New OHLC: "+open+"/"+high+"/"+low+"/"+close+". Have "+lows.size());
 			open = quote.getMidpoint();
 			close = quote.getMidpoint();
 			high = 0;
 			low = Double.MAX_VALUE;
+			//quote = new Quote();
 		}
 
-		if (quote.getMidpoint() > high)
+		if (quote.getMidpoint() > high) {
 			high = quote.getMidpoint();
-		if (quote.getMidpoint() < low)
+			log.info("New high: "+high);
+		}
+		if (quote.getMidpoint() < low) {
 			low = quote.getMidpoint();
+			log.info("New low: "+low);
+		}
 		close = quote.getMidpoint();
 
-		if(quoteUpdateCount!=10) 
+		if(quoteUpdateCount!=0) 
 			return;
 
 		// slice ..
-		if (opens.size() > (Math.max(period1, period2) + 2)) {
+		if (opens.size() > period1 + 2) {
 			opens.remove(0);
 			highs.remove(0);
 			lows.remove(0);
@@ -125,32 +203,46 @@ public class System5 extends BasicTradeSystem {
 		// log.info("Opens: " + opens.size());
 		if (opens.size() < period1 + 1)
 		{
-			System.out.println("Need "+ (Math.max(period1, period2)+1 - opens.size())+ " additional OHLCs.");
+			log.warn("Not enough OHLC datasets, yet: "+ opens.size()+" but would need " +(period1+1));
 			return;
 		}
-
-		double p1 = FinancialLibrary2.EMA(period1, closesArray, 0);
-
-		double lastLow = closes.get(closes.size()-1);
+		
+		double p1 = emaAcc.getMeanValue();
+		double lastLow = lows.get(closes.size()-1);
 		double lastHigh = highs.get(closes.size()-1);
+		log.info("Calc output: "+p1+" <> L:" + lastLow + " <> H:" + lastHigh);
 
-		String crossing1 = ""; 
+		// 
+		if(lastLow < p1 && p1 < lastHigh)
+		{
+			silentSend("uls@jabber.org", "", lastLow +" < *"+p1+"* < " + lastHigh);
+		}
+		else if(p1 < lastLow)
+		{
+			silentSend("uls@jabber.org", "", " *"+ p1 + "* < " + lastLow +" < " + lastHigh);
+		}
+		else if(p1 > lastHigh)
+		{
+			silentSend("uls@jabber.org", "", lastLow +" < " + lastHigh + " < *" + p1 + "*");
+		}
+
+		// 
+
 		if(p1>0.0)
 		{
 			if(lastLow > p1 && formerDirection != 1)
 			{
-				crossing1 = "LONG";
+				log.info("Detecting a long at "+quote.toString());
 				formerDirection = 1;
-				
+				silentSend("uls@jabber.org", "LONG", "System 5 says long at "+quote.toString());		
 			}
-			else if(lastHigh < p1 && formerDirection == -1)
+			else if(lastHigh < p1 && formerDirection != -1)
 			{
-				crossing1 = "SHORT";
-				formerDirection = 1; 
+				log.info("Detecting a short at "+quote.toString());
+				formerDirection = -1; 
+				silentSend("uls@jabber.org", "SHORT", "System 5 says short at "+quote.toString());		
 			}
 		}	
-
-
 	}
 
 	public void populateReport(SimpleReport report) {
