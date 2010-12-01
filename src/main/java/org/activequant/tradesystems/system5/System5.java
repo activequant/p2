@@ -63,9 +63,12 @@ public class System5 extends BasicTradeSystem {
 // 			jm.connect();
 //			jm.sendMessage("uls@jabber.org", "System5 coming up", "System 5 is initializing. Good luck. ");		
 			candleDao = new RecorderCandleDao("/home/share/archive");
-			con = new XMPPConnection("activequant.org");
+			String server = System.getProperty("XMPP_SERVER");
+			con = new XMPPConnection(server);
 			con.connect();
-			con.login("ustaudinger", "eX13Zy18");
+			String login=System.getPropertty("XMPP_UID");
+			String pass=System.getProperty("XMPP_PWD");
+			con.login(login, pass);
 			muc = new MultiUserChat(con, "system5@conference.activequant.org");
 			muc.join("system5");
 			silentSend("", "", "System 5 is coming up.");
@@ -78,7 +81,7 @@ public class System5 extends BasicTradeSystem {
 			ex.printStackTrace();
 			return false;
 		}
-		period1 = 10; 
+		period1 = 5; 
 		emaAcc.setPeriod(period1);
 		return true;
 	}

@@ -3,6 +3,8 @@
 <beans>
 	<import resource="classpath:core/converters.xml" />
 	<import resource="classpath:activequantdao/dao-hibernate.xml" />
+
+
 	
 	<bean id="quoteArchiveDao" class="org.activequant.util.RecorderQuoteDao">
 		<constructor-arg>
@@ -19,7 +21,7 @@
 	<bean id="context" class="org.activequant.util.QuoteRecorder"
 		init-method="record">
 		<property name="source" ref="quoteSourceJms" />
-		<property name="dao" ref="quoteArchiveDao" />
+		<property name="dao" ref="quoteDao" />
 		<property name="specDao" ref="specificationDao" />
 	</bean>
 </beans>

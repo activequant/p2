@@ -82,35 +82,32 @@ public class MessageHandler implements MessageListener {
 
 			handleQuoteLine(aCsvDataLine);
 		}
+		else if(aCsvDataLine.indexOf("T=OE")!=-1){
+		    // have to handle an order event.
+		}
 		else if(aCsvDataLine.indexOf("PRICE")!=-1)
 		{
 			handleTickLine(aCsvDataLine);
 		}
-
-
-		
 	}
-
 	private void handleTickLine(String aCsvDataLine)
 	{
-
 	}
 	
 	private void handleQuoteLine(String aCsvDataLine)
 	{
-
 		Quote myQuote = new Quote();
 		// setting the instrument specification
 		myQuote.setInstrumentSpecification(spec);
 		if(logger.isDebugEnabled()){
 			logger.debug("Parsing CSV line: "+aCsvDataLine);
-		}		
+		}
 		Long myTime = null;
 		String[] myDataEntries = aCsvDataLine.split(",");
 		for (String myDataEntry : myDataEntries) {
 			String[] myData = myDataEntry.split("=");
 			if (myData.length == 2 && !myData[1].equals("")) {
-				String myKey = myData[0];				
+				String myKey = myData[0];
 				// System.out.println(myKey);
 				if (myKey.equals("TIME")) {
 					// time parsing. 
@@ -136,9 +133,9 @@ public class MessageHandler implements MessageListener {
 				} else {
 					Double myValue = Double.parseDouble(myData[1]);
 					if(myKey.endsWith("BID")) myQuote.setBidPrice(myValue);
-					if(myKey.endsWith("ASK")) myQuote.setAskPrice(myValue);
-					if(myKey.endsWith("BIDVOL")) myQuote.setBidQuantity(Math.abs(myValue));
-					if(myKey.endsWith("ASKVOL")) myQuote.setAskQuantity(Math.abs(myValue));										
+					else if(myKey.endsWith("ASK")) myQuote.setAskPrice(myValue);
+					else if(myKey.endsWith("BIDVOL")) myQuote.setBidQuantity(Math.abs(myValue));
+					else if(myKey.endsWith("ASKVOL")) myQuote.setAskQuantity(Math.abs(myValue));
 				}
 			}
 		}
