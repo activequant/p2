@@ -75,6 +75,7 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 		///		
 		
 		// instantiate the trade system
+		@SuppressWarnings("unchecked")
 		Class<AlgoEnvConfig> clazz1 = (Class<AlgoEnvConfig>) Class
 				.forName(algoEnvClassFile);
 		AlgoEnvConfig algoEnvConfig = clazz1.newInstance();
@@ -107,6 +108,7 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 
 		
 		// instantiate the trade system
+		@SuppressWarnings("unchecked")
 		Class<IBatchTradeSystem> clazz2 = (Class<IBatchTradeSystem>) Class
 				.forName(algoEnvConfig.getAlgoConfig().getAlgorithm());
 		system = clazz2.newInstance();

@@ -51,7 +51,6 @@ public class PnlLogger2 extends LoggerBase {
 			positionValueSeries.put(spec, new ValueSeries());
 		}
 		positionValueSeries.get(spec).add(new TimedValue(timestamp, position));
-
 	}
 
 	private void addInstrumentPnlValue(InstrumentSpecification spec, TimeStamp timestamp, double position) {

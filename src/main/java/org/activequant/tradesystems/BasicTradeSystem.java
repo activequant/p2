@@ -14,6 +14,7 @@ import org.activequant.core.types.OrderSide;
 import org.activequant.core.types.OrderType;
 import org.activequant.core.types.TimeStamp;
 import org.activequant.optimization.domainmodel.AlgoConfig;
+import org.activequant.util.pattern.events.Event2;
 import org.activequant.util.pattern.events.IEventListener;
 
 /**
@@ -23,35 +24,35 @@ import org.activequant.util.pattern.events.IEventListener;
  */
 public class BasicTradeSystem implements IBatchTradeSystem {
 
-	private HashMap<Order, IOrderTracker> orderTrackers = new HashMap<Order, IOrderTracker>();
+	private final HashMap<Order, IOrderTracker> orderTrackers = new HashMap<Order, IOrderTracker>();
 	private AlgoConfig algoConfig; 
 	private AlgoEnvironment algoEnv; 
+	private final Event2<Order, OrderEvent> orderEvents = new Event2<Order, OrderEvent>();
 
-	
+	public Event2<Order, OrderEvent> getOrderEvents() {
+		return orderEvents;
+	}
+
 	public boolean initialize(AlgoEnvironment algoEnv, AlgoConfig algoConfig) {
 		this.algoConfig = algoConfig; 
 		this.algoEnv = algoEnv;
 		return true; 
 	}
 	
-	
 	@Override
 	public void forcedTradingStop() {
 		// doing nothing in this implementation ... 
 	}
-
 
 	@Override
 	public void start() {
 		// doing nothing in this implementation ... 
 	}
 
-
 	@Override
 	public void stop() {
 		// doing nothing in this implementation ... 
 	}
-
 	
 	@Override
 	public void onQuote(Quote quote)
@@ -151,15 +152,17 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 				if (positionDifference > 0) {
 					if (limit == 0.0)
 						limit = Double.MAX_VALUE;
-					Order o = longLimitOrder(spec, limit, positionDifference);
+					final Order o = longLimitOrder(spec, limit, positionDifference);
 					// // log.info("Long limit order at " + limit);
 					IOrderTracker t = algoEnv.getBroker().prepareOrder(o);
 					t.getOrderEventSource().addEventListener(new IEventListener<OrderEvent>() {
 						@Override
 						public void eventFired(OrderEvent event) {
-							if (event instanceof OrderExecutionEvent) {
-								// log.info("Execution at " + ((OrderExecutionEvent) event).getPrice());
-							}
+							try {
+								orderEvents.fire(o, event);
+							} catch (Exception e) {
+								throw new RuntimeException(e);
+							}							
 						}
 					});
 					orderTrackers.put(o, t);
@@ -194,15 +197,17 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 					// have to go further short.
 					if (limit == 0.0)
 						limit = Double.MIN_VALUE;
-					Order o = shortLimitOrder(spec, limit, Math.abs(positionDifference));
+					final Order o = shortLimitOrder(spec, limit, Math.abs(positionDifference));
 					// log.info("Short limit order at " + limit);
 					IOrderTracker t = algoEnv.getBroker().prepareOrder(o);
 					t.getOrderEventSource().addEventListener(new IEventListener<OrderEvent>() {
 						@Override
 						public void eventFired(OrderEvent event) {
-							if (event instanceof OrderExecutionEvent) {
-								// log.info("Execution at " + ((OrderExecutionEvent) event).getPrice());
-							}
+							try {
+								orderEvents.fire(o, event);
+							} catch (Exception e) {
+								throw new RuntimeException(e);
+							}							
 						}
 					});
 					orderTrackers.put(o, t);
@@ -216,12 +221,6 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 	public HashMap<Order, IOrderTracker> getOrderTrackers() {
 		return orderTrackers;
 	}
-
-
-	public void setOrderTrackers(HashMap<Order, IOrderTracker> orderTrackers) {
-		this.orderTrackers = orderTrackers;
-	}
-
 
 	public AlgoConfig getAlgoConfig() {
 		return algoConfig;
