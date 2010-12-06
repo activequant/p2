@@ -31,6 +31,8 @@ import org.jivesoftware.smackx.muc.MultiUserChat;
 
 
 /**
+ 
+ 	Not backtestable in the current code structure. 
 
     System 5. 
 
@@ -148,6 +150,7 @@ public class System5 extends BasicTradeSystem {
 			open = quote.getMidpoint();
 		
 		double currentPosition = 0.000;
+		double currentPositionPnl = 0.0; 
 		if (getAlgoEnv().getBrokerAccount().getPortfolio().hasPosition(
 				quote.getInstrumentSpecification())) {
 			Position pos = getAlgoEnv().getBrokerAccount().getPortfolio().getPosition(quote.getInstrumentSpecification());
@@ -156,9 +159,10 @@ public class System5 extends BasicTradeSystem {
 					.getQuantity();
 			// get the price difference
 			double priceDiff = pos.getPriceDifference(quote);
+			double entryPrice = pos.getAveragePrice();
 			
 			// compute the current pnl
-			double currentPositionPnl = currentPosition * priceDiff; 
+			currentPositionPnl = currentPosition * priceDiff; 
 			
 			// check if the current pnl is lower than our stop loss pnl 
 			if(currentPositionPnl < stopLossPnl)
@@ -166,8 +170,7 @@ public class System5 extends BasicTradeSystem {
 			    double stopLimitPrice = quote.getBidPrice();
 			    if(currentPosition < 0) stopLimitPrice = quote.getAskPrice();
 			    // liquidate 
-			    setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), 0, stopLimitPrice);
-			    return;
+			    setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), 0, stopLimitPrice);			    
 			}			
 		}
 
@@ -256,6 +259,7 @@ public class System5 extends BasicTradeSystem {
 		double lastHigh = highs.get(closes.size()-1);
 		log.info("Calc output: "+p1+" <> L:" + lastLow + " <> H:" + lastHigh);
 
+		
 		// 
 		if(lastLow < p1 && p1 < lastHigh)
 		{
@@ -270,6 +274,15 @@ public class System5 extends BasicTradeSystem {
 			silentSend(lastLow +" < " + lastHigh + " < *" + p1 + "*");
 		}
 
+
+		// logging the current pnl. 
+		if(currentPosition != 0.0)
+		{
+			String text = "[Position PNL] "+ currentPositionPnl;
+			log.info(text);
+			silentSend(text);
+		}
+		
 		// 
 
 		if(p1>0.0)
