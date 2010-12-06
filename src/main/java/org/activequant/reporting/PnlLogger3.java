@@ -10,8 +10,11 @@ import org.activequant.core.domainmodel.account.Order;
 import org.activequant.core.domainmodel.data.Quote;
 import org.activequant.core.domainmodel.data.TimedValue;
 import org.activequant.core.domainmodel.data.ValueSeries;
+import org.activequant.core.domainmodel.events.OrderAcceptEvent;
+import org.activequant.core.domainmodel.events.OrderCancelEvent;
 import org.activequant.core.domainmodel.events.OrderEvent;
 import org.activequant.core.domainmodel.events.OrderExecutionEvent;
+import org.activequant.core.domainmodel.events.OrderRejectEvent;
 import org.activequant.core.types.OrderSide;
 import org.activequant.core.types.TimeStamp;
 import org.activequant.util.log.LoggerBase;
@@ -34,19 +37,25 @@ public class PnlLogger3 extends LoggerBase {
 		this.valueReporter = valueReporter; 
 	}
 
-	private void addPositionValue(InstrumentSpecification spec, TimeStamp timestamp, double position) {
-		if (!positionValueSeries.containsKey(spec)) {
-			positionValueSeries.put(spec, new ValueSeries());
-		}
-		positionValueSeries.get(spec).add(new TimedValue(timestamp, position));
-
+	/**
+	 * the getter for the pnl value series.
+	 * 
+	 * @return
+	 */
+	public ValueSeries getPnlValueSeries() {
+		return pnlValueSeries;
 	}
 
-	private void addInstrumentPnlValue(InstrumentSpecification spec, TimeStamp timestamp, double position) {
-
+	public ValueSeries getPositionValueSeries(InstrumentSpecification spec) {
+		ValueSeries vs = positionValueSeries.get(spec);
+		// sanity. 
+		if(vs==null)
+			vs = new ValueSeries();
+		return vs; 
 	}
-
+	
 	public void log(Order order, OrderEvent event) {
+		
 		if (event instanceof OrderExecutionEvent) {
 			OrderExecutionEvent executionEvent = (OrderExecutionEvent) event;
 			long iid = order.getInstrumentSpecification().getId();
@@ -80,12 +89,10 @@ public class PnlLogger3 extends LoggerBase {
 			addPositionValue(order.getInstrumentSpecification(), event.getEventTimeStamp(), newPosition);
 			theInstrumentValuationPrices.put(iid, executionEvent.getPrice());
 			valueReporter.report(event.getEventTimeStamp(), "POSITION",newPosition);
-		}		
+		}				
 	}
 
 	public void log(Quote quote) {
-	
-
 		long iid = 0;
 		if(quote.getInstrumentSpecification()!=null)
 		{
@@ -93,7 +100,6 @@ public class PnlLogger3 extends LoggerBase {
 				iid = quote.getInstrumentSpecification().getId();
 		}
 		
-
 		if (!thePositions.containsKey(iid))
 			thePositions.put(iid, 0.0);
 
@@ -131,21 +137,18 @@ public class PnlLogger3 extends LoggerBase {
 		valueReporter.report(ts, "PNL", val);
 	}
 
-	/**
-	 * the getter for the pnl value series.
-	 * 
-	 * @return
-	 */
-	public ValueSeries getPnlValueSeries() {
-		return pnlValueSeries;
+
+	private void addPositionValue(InstrumentSpecification spec, TimeStamp timestamp, double position) {
+		if (!positionValueSeries.containsKey(spec)) {
+			positionValueSeries.put(spec, new ValueSeries());
+		}
+		positionValueSeries.get(spec).add(new TimedValue(timestamp, position));
+
 	}
 
-	public ValueSeries getPositionValueSeries(InstrumentSpecification spec) {
-		ValueSeries vs = positionValueSeries.get(spec);
-		// sanity. 
-		if(vs==null)
-			vs = new ValueSeries();
-		return vs; 
+	private void addInstrumentPnlValue(InstrumentSpecification spec, TimeStamp timestamp, double position) {
+
 	}
+	
 
 }

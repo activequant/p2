@@ -9,7 +9,6 @@ import org.activequant.core.domainmodel.account.Order;
 import org.activequant.core.domainmodel.account.OrderHistory;
 import org.activequant.core.domainmodel.data.Quote;
 import org.activequant.core.domainmodel.events.OrderEvent;
-import org.activequant.core.domainmodel.events.OrderExecutionEvent;
 import org.activequant.core.types.OrderSide;
 import org.activequant.core.types.OrderType;
 import org.activequant.core.types.TimeStamp;

@@ -3,7 +3,6 @@ package org.activequant.tradesystems.system5;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -19,20 +18,22 @@ import org.activequant.core.types.TimeFrame;
 import org.activequant.core.types.TimeStamp;
 import org.activequant.math.algorithms.EMAAccumulator;
 import org.activequant.optimization.domainmodel.AlgoConfig;
+import org.activequant.reporting.MUCValueReporter;
+import org.activequant.reporting.PnlLogger3;
 import org.activequant.tradesystems.AlgoEnvironment;
 import org.activequant.tradesystems.BasicTradeSystem;
+import org.activequant.tradesystems.RunMode;
 import org.activequant.util.RecorderCandleDao;
-import org.activequant.util.messaging.jabber.JabberMessenger;
 import org.activequant.util.pattern.events.IEventListener2;
-import org.activequant.util.tools.ArrayUtils;
 import org.apache.log4j.Logger;
+import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 
 /**
- 
- 	Not backtestable in the current code structure. 
 
     System 5. 
 
@@ -42,63 +43,86 @@ public class System5 extends BasicTradeSystem {
 	private List<Quote> quoteList = new ArrayList<Quote>();
 	private Quote formerQuote;
 	private int period1; 
-	private double mpOld, p1Old, p2Old; 
 	private int formerDirection = 0;
-	private double stopLossPnl = 100;  
+	private double stopLossPnl = 100, currentPosition = 0.0, currentPositionPnl = 0.0; 
 
     protected final static Logger log = Logger.getLogger(System5.class);
 	
-
 	private List<Double> lows = new ArrayList<Double>();
 	private List<Double> highs = new ArrayList<Double>();
 	private List<Double> opens = new ArrayList<Double>();
 	private List<Double> closes = new ArrayList<Double>();
 	BufferedWriter candleWriter;
-	private RecorderCandleDao candleDao; 
+	private RecorderCandleDao candleDao;
+	
 	private EMAAccumulator emaAcc = new EMAAccumulator();
 
 	private double open, high, low = Double.MAX_VALUE, close;
-	private JabberMessenger jm;
 	private XMPPConnection con; 
 	private MultiUserChat muc; 
+	private PnlLogger3 pnlLogger3; 
 
-	int formerPosition = 0;
-
-	int quoteUpdateCount = 0;
-	boolean shortStopped = false;
-	boolean longStopped = false;
+	private int quoteUpdateCount = 0;
+	private boolean tradeFlag = true; 
 
 	@Override
 	public boolean initialize(AlgoEnvironment algoEnv, AlgoConfig algoConfig) {
 		super.initialize(algoEnv, algoConfig);
 		try{
-			candleDao = new RecorderCandleDao("/home/share/archive");
-			String server = System.getProperty("XMPP_SERVER");
-			con = new XMPPConnection(server);
-			con.connect();
-			String login=System.getProperty("XMPP_UID");
-			String pass=System.getProperty("XMPP_PWD");
-			con.login(login, pass);
-			muc = new MultiUserChat(con, "system5@conference.activequant.org");
-			muc.join("system5");
-			silentSend("System 5 is coming up.");
-			// initialize the candle stream writer
-			candleWriter = new BufferedWriter(new FileWriter("candles.csv")); 	
-			
-			// register for the order events. 
-			getOrderEvents().addEventListener(new IEventListener2<Order, OrderEvent>() {				
-				@Override
-				public void eventFired(Order arg0, OrderEvent arg1) throws Exception {
-					if(arg1 instanceof OrderExecutionEvent)
-					{
-						silentSend("[OrderEvent] "+arg0.toString()+" -> "+((OrderExecutionEvent)arg1).getQuantity()+" @ "+((OrderExecutionEvent)arg1).getPrice());
+			if(algoEnv.getRunMode().equals(RunMode.PRODUCTION))
+			{				
+				candleDao = new RecorderCandleDao("/home/share/archive");
+				String server = System.getProperty("XMPP_SERVER");
+				con = new XMPPConnection(server);
+				con.connect();
+				String login=System.getProperty("XMPP_UID");
+				String pass=System.getProperty("XMPP_PWD");
+				con.login(login, pass, "System5");
+				muc = new MultiUserChat(con, "system5@conference.activequant.org");
+				muc.join("system5");
+				muc.addMessageListener(new PacketListener() {					
+					@Override
+					public void processPacket(Packet arg0) {
+						if(arg0 instanceof Message)
+						{
+							Message msg = (Message)arg0; 
+							String body = msg.getBody(); 
+							if(body.equals("STOP")){
+								tradeFlag = false;
+								silentSend("Stopping trading. ");
+							}
+							else if(body.equals("START"))
+							{
+								tradeFlag = true;
+								silentSend("Starting trading. ");
+							}
+						}
 					}
-					else{
-						silentSend("[OrderEvent] "+arg0.toString()+" -> "+arg1.getMessage());
+				});
+				silentSend("System 5 is coming up.");
+				
+				// initialize the candle stream writer
+				candleWriter = new BufferedWriter(new FileWriter("candles.csv")); 	
+				
+				// 
+				pnlLogger3 = new PnlLogger3(new MUCValueReporter(server, login, pass, "System5Pnl", "system5@conference.activequant.org"));
+				
+				// register for the order events. 
+				getOrderEvents().addEventListener(new IEventListener2<Order, OrderEvent>() {				
+					@Override
+					public void eventFired(Order arg0, OrderEvent arg1) throws Exception {
+						if(getAlgoEnv().getRunMode().equals(RunMode.PRODUCTION))
+							pnlLogger3.log(arg0, arg1);
+						if(arg1 instanceof OrderExecutionEvent)
+						{
+							silentSend("[OrderEvent] "+arg0.toString()+" -> "+((OrderExecutionEvent)arg1).getQuantity()+" @ "+((OrderExecutionEvent)arg1).getPrice());
+						}
+						else{
+							silentSend("[OrderEvent] "+arg0.toString()+" -> "+arg1.getMessage());
+						}
 					}
-				}
-			});
-			
+				});				
+			}			
 		}
 		catch(Exception ex)
 		{
@@ -119,7 +143,8 @@ public class System5 extends BasicTradeSystem {
 	private void silentSend(String msg)
 	{
 		try{
-			muc.sendMessage(msg);
+			if(getAlgoEnv().getRunMode().equals(RunMode.PRODUCTION))
+				muc.sendMessage(msg);
 		}
 		catch(Exception ex)
 		{
@@ -130,10 +155,14 @@ public class System5 extends BasicTradeSystem {
 	private void silentWriteCandle(InstrumentSpecification spec, double open, double high, double low, double close, double ema)
 	{
 		try{
-			candleWriter.write(System.currentTimeMillis()+";"+open+";"+high+";"+low+";"+close+";"+ema+"\n");
-			candleWriter.flush();
-			Candle c = new Candle(spec, new TimeStamp(new Date()), open, high, low, close, 0.0, TimeFrame.TIMEFRAME_1_TICK);
-			candleDao.update(c);
+			if(getAlgoEnv().getRunMode().equals(RunMode.PRODUCTION)){
+				// save the ema output. 
+				candleWriter.write(System.currentTimeMillis()+";"+open+";"+high+";"+low+";"+close+";"+ema+"\n");
+				candleWriter.flush();
+				// also save it to the archive. 
+				Candle c = new Candle(spec, new TimeStamp(new Date()), open, high, low, close, 0.0, TimeFrame.TIMEFRAME_1_TICK);
+				candleDao.update(c);
+			}
 		}
 		catch(Exception ex){
 			ex.printStackTrace();
@@ -141,56 +170,21 @@ public class System5 extends BasicTradeSystem {
 
 	}
 
+	
+	
 	@Override
 	public void onQuote(Quote quote) {
-	
 		
-		// check if it is the first quote we receive. 
-		if(open==0.0)
-			open = quote.getMidpoint();
+		if(!okChecks(quote))return; 
+		positionChecks(quote); 
 		
-		double currentPosition = 0.000;
-		double currentPositionPnl = 0.0; 
-		if (getAlgoEnv().getBrokerAccount().getPortfolio().hasPosition(
-				quote.getInstrumentSpecification())) {
-			Position pos = getAlgoEnv().getBrokerAccount().getPortfolio().getPosition(quote.getInstrumentSpecification());
-			currentPosition = getAlgoEnv().getBrokerAccount().getPortfolio()
-					.getPosition(quote.getInstrumentSpecification())
-					.getQuantity();
-			// get the price difference
-			double priceDiff = pos.getPriceDifference(quote);
-			double entryPrice = pos.getAveragePrice();
-			
-			// compute the current pnl
-			currentPositionPnl = currentPosition * priceDiff; 
-			
-			// check if the current pnl is lower than our stop loss pnl 
-			if(currentPositionPnl < stopLossPnl)
-			{
-			    double stopLimitPrice = quote.getBidPrice();
-			    if(currentPosition < 0) stopLimitPrice = quote.getAskPrice();
-			    // liquidate 
-			    setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), 0, stopLimitPrice);			    
-			}			
-		}
-
-		if (formerQuote != null) {
-			if ((quote.getBidPrice() == formerQuote.getBidPrice() && quote
-					.getAskPrice() == formerQuote.getAskPrice())
-					|| (quote.getBidPrice() == Quote.NOT_SET || quote
-							.getAskPrice() == Quote.NOT_SET))
-				return;
-		}
-		log.info("New quote: "+quote.toString());
-
-		System.out.print("\n"+quote.getBidPrice()+"/"+quote.getAskPrice()+" ");
+		// 
 		formerQuote = quote; 
 
-		// only 100% sane quotes ...
-		if (quote.getBidPrice() == Quote.NOT_SET
-				|| quote.getAskPrice() == Quote.NOT_SET)
-			return;
-	
+		// log the quote. 
+		if(getAlgoEnv().getRunMode().equals(RunMode.PRODUCTION))
+			pnlLogger3.log(quote);
+		
 		quoteUpdateCount++;
 
 		// aggregating five quotes into one candle (non-time discrete)
@@ -209,7 +203,6 @@ public class System5 extends BasicTradeSystem {
 			close = quote.getMidpoint();
 			high = 0;
 			low = Double.MAX_VALUE;
-			//quote = new Quote();
 		}
 
 		if (quote.getMidpoint() > high) {
@@ -222,6 +215,7 @@ public class System5 extends BasicTradeSystem {
 		}
 		close = quote.getMidpoint();
 
+		// proceeding only when we have a full candle. 
 		if(quoteUpdateCount!=0) 
 			return;
 
@@ -232,35 +226,22 @@ public class System5 extends BasicTradeSystem {
 			lows.remove(0);
 			closes.remove(0);
 		}
-
-		Collections.reverse(opens);
-		Collections.reverse(highs);
-		Collections.reverse(lows);
-		Collections.reverse(closes);
-
-		double[] opensArray = ArrayUtils.convert(opens);
-		double[] highsArray = ArrayUtils.convert(highs);
-		double[] lowsArray = ArrayUtils.convert(lows);
-		double[] closesArray = ArrayUtils.convert(closes);
-
-		Collections.reverse(opens);
-		Collections.reverse(highs);
-		Collections.reverse(lows);
-		Collections.reverse(closes);
-		// log.info("Opens: " + opens.size());
+	
+		// 
 		if (opens.size() < period1 + 1)
 		{
 			log.warn("Not enough OHLC datasets, yet: "+ opens.size()+" but would need " +(period1+1));
 			return;
 		}
 		
+		// processing high and low. 
 		double p1 = emaAcc.getMeanValue();
 		double lastLow = lows.get(closes.size()-1);
 		double lastHigh = highs.get(closes.size()-1);
 		log.info("Calc output: "+p1+" <> L:" + lastLow + " <> H:" + lastHigh);
 
 		
-		// 
+		// dump. 
 		if(lastLow < p1 && p1 < lastHigh)
 		{
 			silentSend(lastLow +" < *"+p1+"* < " + lastHigh);
@@ -274,8 +255,7 @@ public class System5 extends BasicTradeSystem {
 			silentSend(lastLow +" < " + lastHigh + " < *" + p1 + "*");
 		}
 
-
-		// logging the current pnl. 
+		// logging the current position's PNL. 
 		if(currentPosition != 0.0)
 		{
 			String text = "[Position PNL] "+ currentPositionPnl;
@@ -283,8 +263,10 @@ public class System5 extends BasicTradeSystem {
 			silentSend(text);
 		}
 		
+		// check if we should trade. 
+		if(!tradeFlag)return;
+		
 		// 
-
 		if(p1>0.0)
 		{
 			if(lastLow > p1 && formerDirection != 1)
@@ -292,8 +274,7 @@ public class System5 extends BasicTradeSystem {
 				log.info("Detecting a long at "+quote.toString());
 				formerDirection = 1;
 				silentSend("System 5 says long at "+quote.toString());		
-				setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), 1, quote.getAskPrice());
-				
+				setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), 1, quote.getAskPrice());				
 			}
 			else if(lastHigh < p1 && formerDirection != -1)
 			{
@@ -325,4 +306,57 @@ public class System5 extends BasicTradeSystem {
 
 	}
 
+	
+	private void positionChecks(Quote quote)
+	{
+
+		currentPosition = 0.000;
+		currentPositionPnl = 0.0; 
+		if (getAlgoEnv().getBrokerAccount().getPortfolio().hasPosition(
+				quote.getInstrumentSpecification())) {
+			Position pos = getAlgoEnv().getBrokerAccount().getPortfolio().getPosition(quote.getInstrumentSpecification());
+			currentPosition = getAlgoEnv().getBrokerAccount().getPortfolio()
+					.getPosition(quote.getInstrumentSpecification())
+					.getQuantity();
+			// get the price difference
+			double priceDiff = pos.getPriceDifference(quote);
+			
+			// compute the current pnl
+			currentPositionPnl = currentPosition * priceDiff; 
+			
+			// check if the current pnl is lower than our stop loss pnl 
+			if(currentPositionPnl < stopLossPnl)
+			{
+			    double stopLimitPrice = quote.getBidPrice();
+			    if(currentPosition < 0) stopLimitPrice = quote.getAskPrice();
+			    // liquidate 
+			    setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), 0, stopLimitPrice);			    
+			}			
+		}
+
+	}
+
+	private  boolean okChecks(Quote quote)
+	{		
+		// check if it is the first quote we receive. 
+		if(open==0.0)
+			open = quote.getMidpoint();
+		
+		// only 100% sane quotes ...
+		if (quote.getBidPrice() == Quote.NOT_SET
+				|| quote.getAskPrice() == Quote.NOT_SET)
+			return false; 
+		
+		if (formerQuote != null) {
+			if ((quote.getBidPrice() == formerQuote.getBidPrice() && quote
+					.getAskPrice() == formerQuote.getAskPrice())
+					|| (quote.getBidPrice() == Quote.NOT_SET || quote
+							.getAskPrice() == Quote.NOT_SET))
+				return false;
+		}
+
+		// all fine. 
+		return true; 
+	}
+	
 }

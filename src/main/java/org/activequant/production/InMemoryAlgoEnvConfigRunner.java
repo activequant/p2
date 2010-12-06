@@ -23,7 +23,6 @@ import org.activequant.reporting.VoidValueReporter;
 import org.activequant.tradesystems.AlgoEnvironment;
 import org.activequant.tradesystems.IBatchTradeSystem;
 import org.activequant.util.AlgoEnvBase;
-import org.activequant.util.SimpleSerializer;
 import org.activequant.util.VirtualQuoteSubscriptionSource;
 import org.activequant.util.pattern.events.IEventListener;
 import org.activequant.util.spring.ServiceLocator;
@@ -85,7 +84,7 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 		log.info("Instruments: " + algoEnvConfig.getInstruments());
 		log.info("Start/Stop Times: " + algoEnvConfig.getStartStopTimes());
 
-		// instantiate trade system.
+		// instantiate trade system.RunMode
 		initializeStartStops(algoEnvConfig.getStartStopTimes());
 
 		

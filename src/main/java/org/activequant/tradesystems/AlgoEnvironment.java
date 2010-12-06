@@ -1,9 +1,6 @@
 package org.activequant.tradesystems;
 
-import java.util.List;
-
 import org.activequant.broker.IBroker;
-import org.activequant.core.domainmodel.InstrumentSpecification;
 import org.activequant.core.domainmodel.account.BrokerAccount;
 import org.activequant.optimization.domainmodel.AlgoEnvConfig;
 import org.activequant.reporting.IValueReporter;
@@ -20,8 +17,14 @@ public class AlgoEnvironment {
 	private IBroker broker;
 	private BrokerAccount brokerAccount;
 	private IValueReporter valueReporter; 
-
+	private RunMode runMode = RunMode.PRODUCTION;
 	
+	public RunMode getRunMode() {
+		return runMode;
+	}
+	public void setRunMode(RunMode runMode) {
+		this.runMode = runMode;
+	}
 	public IValueReporter getValueReporter() {
 		return valueReporter;
 	}

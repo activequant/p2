@@ -55,17 +55,14 @@ public class PlainOrderLogger extends LoggerBase {
 			write(myEvent.getMessage()+";");
 		}
 		else if (event instanceof OrderAcceptEvent) {
-			OrderAcceptEvent myEvent = (OrderAcceptEvent) event;
 			write("ACCEPT;");			
 			write(event.getMessage()+";");
 		}
 		else if (event instanceof OrderRejectEvent) {
-			OrderAcceptEvent myEvent = (OrderAcceptEvent) event;
 			write("REJECT;");			
 			write(event.getMessage()+";");
 		}
 		else if (event instanceof OrderCancelEvent) {
-			OrderCancelEvent myEvent = (OrderCancelEvent) event;
 			write("CANCEL;");
 			write(event.getMessage()+";");
 			

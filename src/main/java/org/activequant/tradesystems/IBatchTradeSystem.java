@@ -1,12 +1,8 @@
 package org.activequant.tradesystems;
 
-import org.activequant.broker.IBroker;
 import org.activequant.container.report.SimpleReport;
-import org.activequant.core.domainmodel.InstrumentSpecification;
-import org.activequant.core.domainmodel.account.BrokerAccount;
 import org.activequant.core.domainmodel.data.Quote;
 import org.activequant.optimization.domainmodel.AlgoConfig;
-import org.activequant.optimization.domainmodel.AlgoEnvConfig;
 
 public interface IBatchTradeSystem {
 	
