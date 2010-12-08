@@ -1,8 +1,5 @@
 package org.activequant.reporting;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashMap;
 
 import org.activequant.core.domainmodel.InstrumentSpecification;
@@ -10,11 +7,8 @@ import org.activequant.core.domainmodel.account.Order;
 import org.activequant.core.domainmodel.data.Quote;
 import org.activequant.core.domainmodel.data.TimedValue;
 import org.activequant.core.domainmodel.data.ValueSeries;
-import org.activequant.core.domainmodel.events.OrderAcceptEvent;
-import org.activequant.core.domainmodel.events.OrderCancelEvent;
 import org.activequant.core.domainmodel.events.OrderEvent;
 import org.activequant.core.domainmodel.events.OrderExecutionEvent;
-import org.activequant.core.domainmodel.events.OrderRejectEvent;
 import org.activequant.core.types.OrderSide;
 import org.activequant.core.types.TimeStamp;
 import org.activequant.util.log.LoggerBase;
@@ -33,7 +27,11 @@ public class PnlLogger3 extends LoggerBase {
 	private HashMap<InstrumentSpecification, ValueSeries> positionValueSeries = new HashMap<InstrumentSpecification, ValueSeries>();
 	private IValueReporter valueReporter; 
 
-	public PnlLogger3(IValueReporter valueReporter) throws IOException {
+	/**
+	 * PNL Logger constructor that can take a value reporter where to report the values over.  
+	 * @param valueReporter
+	 */
+	public PnlLogger3(IValueReporter valueReporter) {
 		this.valueReporter = valueReporter; 
 	}
 
@@ -109,12 +107,18 @@ public class PnlLogger3 extends LoggerBase {
 		if (currentPosition != 0.0) {
 			double myLastPrice = theInstrumentValuationPrices.get(iid);
 			double myRelevantQuotePrice = currentPosition > 0 ? quote.getBidPrice() : quote.getAskPrice();
-			double myChangeInPrice = currentPosition > 0 ? (quote.getBidPrice() - myLastPrice) : (myLastPrice - quote.getAskPrice());
+			double myChangeInPrice = myRelevantQuotePrice - myLastPrice;
+			
 			//
-			double myChangeInPnl = myChangeInPrice * Math.abs(currentPosition);
-			pnl += (myChangeInPnl / quote.getInstrumentSpecification().getTickSize()) * quote.getInstrumentSpecification().getTickValue();
+			double myChangeInPnl = myChangeInPrice * currentPosition;
+			
+			// compute the number of ticks ... 
+			pnl += (myChangeInPnl / quote.getInstrumentSpecification().getTickSize()) 
+					* quote.getInstrumentSpecification().getTickValue();
+			
 			// track the current valuation price.
 			theInstrumentValuationPrices.put(iid, myRelevantQuotePrice);
+			
 			// 			
 			quoteCount++;
 		} else {

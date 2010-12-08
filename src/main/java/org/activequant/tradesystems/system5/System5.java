@@ -115,10 +115,10 @@ public class System5 extends BasicTradeSystem {
 							pnlLogger3.log(arg0, arg1);
 						if(arg1 instanceof OrderExecutionEvent)
 						{
-							silentSend("[OrderEvent] "+arg0.toString()+" -> "+((OrderExecutionEvent)arg1).getQuantity()+" @ "+((OrderExecutionEvent)arg1).getPrice());
+							silentSend("[OrderExecution] "+arg0.toString()+"\nEXECUTED: "+((OrderExecutionEvent)arg1).getQuantity()+" @ "+((OrderExecutionEvent)arg1).getPrice());
 						}
 						else{
-							silentSend("[OrderEvent] "+arg0.toString()+" -> "+arg1.getMessage());
+							//silentSend("[OrderEvent] "+arg0.toString()+" -> "+arg1.getMessage());
 						}
 					}
 				});				
@@ -180,7 +180,7 @@ public class System5 extends BasicTradeSystem {
 		
 		// 
 		formerQuote = quote; 
-
+		
 		// log the quote. 
 		if(getAlgoEnv().getRunMode().equals(RunMode.PRODUCTION))
 			pnlLogger3.log(quote);
@@ -309,7 +309,6 @@ public class System5 extends BasicTradeSystem {
 	
 	private void positionChecks(Quote quote)
 	{
-
 		currentPosition = 0.000;
 		currentPositionPnl = 0.0; 
 		if (getAlgoEnv().getBrokerAccount().getPortfolio().hasPosition(
@@ -322,7 +321,7 @@ public class System5 extends BasicTradeSystem {
 			double priceDiff = pos.getPriceDifference(quote);
 			
 			// compute the current pnl
-			currentPositionPnl = currentPosition * priceDiff; 
+			currentPositionPnl = Math.abs(currentPosition) * priceDiff; 
 			
 			// check if the current pnl is lower than our stop loss pnl 
 			if(currentPositionPnl < stopLossPnl)
@@ -333,7 +332,6 @@ public class System5 extends BasicTradeSystem {
 			    setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), 0, stopLimitPrice);			    
 			}			
 		}
-
 	}
 
 	private  boolean okChecks(Quote quote)
