@@ -158,15 +158,18 @@ public class System5 extends BasicTradeSystem {
 		query.setStartTimeStamp(new TimeStamp(cal.getTime()));
 		query.setEndTimeStamp(new TimeStamp(new Date()));
 		// set start and stop time frame. 
+		log.info("Loading quotes. ");
 		Quote[] quotes = getAlgoEnv().getQuoteDao().findBySeriesSpecification(query);
 		int length = quotes.length;
 		tradeFlag = false; 
+		log.info("Replaying "+length+" quotes");
 		for(int i=length -1;i>=0;i--)
 		{
 			Quote q = quotes[i];
 			onQuote(q);
 			
 		}
+		log.info("Replayed "+length+" quotes.");
 		tradeFlag = true; 
 	}
 	
