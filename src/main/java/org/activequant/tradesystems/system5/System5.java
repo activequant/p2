@@ -77,6 +77,7 @@ public class System5 extends BasicTradeSystem {
 			if(algoEnv.getRunMode().equals(RunMode.PRODUCTION))
 			{				
 				
+				backfill();
 				
 				candleDao = new RecorderCandleDao("/home/share/archive");
 				String server = System.getProperty("XMPP_SERVER");
@@ -131,7 +132,6 @@ public class System5 extends BasicTradeSystem {
 				});
 				
 				// now all is wired ... do the backfill
-				backfill();
 				
 			}			
 		}
@@ -155,7 +155,7 @@ public class System5 extends BasicTradeSystem {
 		InstrumentSpecification spec = getAlgoEnv().getSpecDao().find(instrumentId);
 		SeriesSpecification query = new SeriesSpecification(spec);
 		Calendar cal = GregorianCalendar.getInstance();
-		cal.add(Calendar.HOUR, -2);
+		cal.add(Calendar.HOUR, -10);
 		query.setStartTimeStamp(new TimeStamp(cal.getTime()));
 		query.setEndTimeStamp(new TimeStamp(new Date()));
 		// set start and stop time frame. 
@@ -222,7 +222,7 @@ public class System5 extends BasicTradeSystem {
 		
 		// 
 		formerQuote = quote; 
-		
+		log.info("New quote.");		
 	
 		quoteUpdateCount++;
 
