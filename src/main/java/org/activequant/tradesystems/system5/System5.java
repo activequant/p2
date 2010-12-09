@@ -19,7 +19,6 @@ import org.activequant.core.domainmodel.events.OrderEvent;
 import org.activequant.core.domainmodel.events.OrderExecutionEvent;
 import org.activequant.core.types.TimeFrame;
 import org.activequant.core.types.TimeStamp;
-import org.activequant.dao.hibernate.QuoteDao;
 import org.activequant.math.algorithms.EMAAccumulator;
 import org.activequant.optimization.domainmodel.AlgoConfig;
 import org.activequant.reporting.MUCValueReporter;
@@ -77,8 +76,9 @@ public class System5 extends BasicTradeSystem {
 			if(algoEnv.getRunMode().equals(RunMode.PRODUCTION))
 			{				
 				
+				// do the backfill
 				backfill();
-				
+				//
 				candleDao = new RecorderCandleDao("/home/share/archive");
 				String server = System.getProperty("XMPP_SERVER");
 				con = new XMPPConnection(server);
@@ -131,8 +131,6 @@ public class System5 extends BasicTradeSystem {
 					}
 				});
 				
-				// now all is wired ... do the backfill
-				
 			}			
 		}
 		catch(Exception ex)
@@ -167,8 +165,7 @@ public class System5 extends BasicTradeSystem {
 		for(int i=length -1;i>=0;i--)
 		{
 			Quote q = quotes[i];
-			onQuote(q);
-			
+			onQuote(q);			
 		}
 		log.info("Replayed "+length+" quotes.");
 		tradeFlag = true; 
@@ -222,7 +219,6 @@ public class System5 extends BasicTradeSystem {
 		
 		// 
 		formerQuote = quote; 
-		log.info("New quote.");		
 	
 		quoteUpdateCount++;
 
@@ -234,6 +230,9 @@ public class System5 extends BasicTradeSystem {
 				opens.add(open);
 				highs.add(high);
 				closes.add(close);
+			}
+			else{
+				log.info("Skipping candle, as open is not greater than 0.");
 			}
 			emaAcc.accumulate(close);
 			silentWriteCandle(quote.getInstrumentSpecification(), open, high, low, close, emaAcc.getMeanValue());
