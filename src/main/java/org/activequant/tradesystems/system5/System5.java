@@ -3,11 +3,14 @@ package org.activequant.tradesystems.system5;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.activequant.container.report.SimpleReport;
 import org.activequant.core.domainmodel.InstrumentSpecification;
+import org.activequant.core.domainmodel.SeriesSpecification;
 import org.activequant.core.domainmodel.account.Order;
 import org.activequant.core.domainmodel.account.Position;
 import org.activequant.core.domainmodel.data.Candle;
@@ -16,6 +19,7 @@ import org.activequant.core.domainmodel.events.OrderEvent;
 import org.activequant.core.domainmodel.events.OrderExecutionEvent;
 import org.activequant.core.types.TimeFrame;
 import org.activequant.core.types.TimeStamp;
+import org.activequant.dao.hibernate.QuoteDao;
 import org.activequant.math.algorithms.EMAAccumulator;
 import org.activequant.optimization.domainmodel.AlgoConfig;
 import org.activequant.reporting.MUCValueReporter;
@@ -72,6 +76,8 @@ public class System5 extends BasicTradeSystem {
 		try{
 			if(algoEnv.getRunMode().equals(RunMode.PRODUCTION))
 			{				
+				
+				
 				candleDao = new RecorderCandleDao("/home/share/archive");
 				String server = System.getProperty("XMPP_SERVER");
 				con = new XMPPConnection(server);
@@ -122,7 +128,11 @@ public class System5 extends BasicTradeSystem {
 							//silentSend("[OrderEvent] "+arg0.toString()+" -> "+arg1.getMessage());
 						}
 					}
-				});				
+				});
+				
+				// now all is wired ... do the backfill
+				backfill();
+				
 			}			
 		}
 		catch(Exception ex)
@@ -134,6 +144,33 @@ public class System5 extends BasicTradeSystem {
 		emaAcc.setPeriod(period1);
 		return true;
 	}
+	
+	/**
+	 * Mind that the DAOs have to be initialized properly. 
+	 */
+	public void backfill()
+	{
+		int instrumentId = getAlgoEnv().getAlgoEnvConfig().getInstruments().get(0);		
+		InstrumentSpecification spec = getAlgoEnv().getSpecDao().find(instrumentId);
+		SeriesSpecification query = new SeriesSpecification(spec);
+		Calendar cal = GregorianCalendar.getInstance();
+		cal.add(Calendar.HOUR, -2);
+		query.setStartTimeStamp(new TimeStamp(cal.getTime()));
+		query.setEndTimeStamp(new TimeStamp(new Date()));
+		// set start and stop time frame. 
+		Quote[] quotes = getAlgoEnv().getQuoteDao().findBySeriesSpecification(query);
+		int length = quotes.length;
+		tradeFlag = false; 
+		for(int i=length -1;i>=0;i--)
+		{
+			Quote q = quotes[i];
+			onQuote(q);
+			
+		}
+		tradeFlag = true; 
+	}
+	
+	
 
 	/**
 	 * Silently send a message to a multi user conference room. 
@@ -144,7 +181,7 @@ public class System5 extends BasicTradeSystem {
 	private void silentSend(String msg)
 	{
 		try{
-			if(getAlgoEnv().getRunMode().equals(RunMode.PRODUCTION))
+			if(getAlgoEnv().getRunMode().equals(RunMode.PRODUCTION) && tradeFlag)
 				muc.sendMessage(msg);
 		}
 		catch(Exception ex)
@@ -156,7 +193,7 @@ public class System5 extends BasicTradeSystem {
 	private void silentWriteCandle(InstrumentSpecification spec, double open, double high, double low, double close, double ema)
 	{
 		try{
-			if(getAlgoEnv().getRunMode().equals(RunMode.PRODUCTION)){
+			if(getAlgoEnv().getRunMode().equals(RunMode.PRODUCTION) && tradeFlag){
 				// save the ema output. 
 				candleWriter.write(System.currentTimeMillis()+";"+open+";"+high+";"+low+";"+close+";"+ema+"\n");
 				candleWriter.flush();

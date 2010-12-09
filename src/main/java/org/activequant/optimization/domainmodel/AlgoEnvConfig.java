@@ -17,6 +17,10 @@ public class AlgoEnvConfig  implements Serializable  {
 	private AlgoConfig algoConfig;
 	private Long id; 
 	private static final long serialVersionUID = 1L;
+	/**
+	 *  contains the instrument ids. 
+	 * @return a list with integers
+	 */
 	public List<Integer> getInstruments() {
 		return instruments;
 	}
