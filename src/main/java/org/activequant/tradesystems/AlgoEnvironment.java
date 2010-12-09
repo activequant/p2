@@ -64,10 +64,10 @@ public class AlgoEnvironment {
 	public void setBrokerAccount(BrokerAccount brokerAccount) {
 		this.brokerAccount = brokerAccount;
 	}
-	public SpecificationDao getSpecDao() {
+	public ISpecificationDao getSpecDao() {
 		return specDao;
 	}
-	public QuoteDao getQuoteDao() {
+	public IQuoteDao getQuoteDao() {
 		return quoteDao;
 	}
 }
