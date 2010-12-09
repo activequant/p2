@@ -120,12 +120,29 @@ class DataRelay {
 			myExampleSpec.setCurrency(Currency.valueOf(aCurrency));
 			myExampleSpec.setExchange(anExchange);
 			myExampleSpec.setVendor(aVendor);
+			myExampleSpec.setTickSize(0.25);
+			myExampleSpec.setTickValue(12.5);
 
-			InstrumentSpecification spec = specDao.findByExample(myExampleSpec);
+
+			InstrumentSpecification[] specs = specDao.findAll();
+			InstrumentSpecification spec = null; 
+			for(InstrumentSpecification s : specs)
+			{
+				log.info("Comparing: "+s.getSymbol().toString()+" // "+s.getCurrency().toString() + " // " + s.getExchange().toString()+ " // " +s.getVendor());
+				log.info("Against: "+ aSymbol + " // " + anExchange + " // " + aCurrency + " // " + aVendor);
+				if(s.getSymbol().toString().equals(aSymbol) &&
+					s.getCurrency().toString().equals(aCurrency) &&
+					s.getExchange().toString().equals(anExchange) &&
+					s.getVendor().toString().equals(aVendor))
+				{
+					spec = s; 
+					break;
+				}	
+			}
+		
+
 			if (spec == null) {
 				myExampleSpec.setLotSize(1);
-				myExampleSpec.setTickSize(1);
-				myExampleSpec.setTickValue(1);
 				myExampleSpec.setSecurityType(SecurityType.FUTURE);
 				spec = specDao.update(myExampleSpec);
 			}
@@ -187,6 +204,25 @@ class WorkerThread implements Runnable {
 			handleTick(parts);
 		} else if (type.equals("Q")) {
 			handleQuote(parts);
+		}
+		else if(type.equals("OE")){
+			handleOE(parts, aLine);
+		}
+	}
+
+	private void handleOE(String[] parts, String msg) throws Exception {
+		try{
+	                String[] myInstrumentParts = parts[1].split(",");
+			InstrumentSpecification spec = theRelay.getSpec(myInstrumentParts[0], myInstrumentParts[1], myInstrumentParts[2],
+                                myInstrumentParts[3]);
+			String myTopic = getTopicName(spec);
+			TextMessage textMessage = getTextMessage(myTopic);
+			textMessage.setText(msg);
+			getProducer(myTopic).send(textMessage);
+		}
+		catch(Exception ex)
+		{	
+			ex.printStackTrace();
 		}
 	}
 
@@ -250,7 +286,7 @@ class WorkerThread implements Runnable {
 			log.debug("Getting text message.");
 			TextMessage myMessage = getTextMessage(myTopic);
 			myMessage.setText(myLine);
-			log.debug("Pushing text message.");
+			log.debug("Pushing text message to topic "+myTopic);
 			getProducer(myTopic).send(myMessage);
 			log.debug("Message published.");
 			// theQuotePublisher.publish(myQuote);

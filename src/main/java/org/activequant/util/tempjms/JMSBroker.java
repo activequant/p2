@@ -6,8 +6,22 @@ import org.activequant.broker.BrokerBase;
 import org.activequant.core.domainmodel.InstrumentSpecification;
 import org.activequant.core.domainmodel.account.Order;
 import org.activequant.core.domainmodel.events.OrderExecutionEvent;
+import org.activequant.core.domainmodel.events.OrderSubmitEvent;
+import org.activequant.core.domainmodel.events.OrderUpdateEvent;
+import org.activequant.core.types.OrderSide;
+import org.activequant.core.types.OrderType;
+import org.activequant.core.types.TimeStamp;
+import org.activequant.data.retrieval.IQuoteSubscriptionSource;
+import org.activequant.data.retrieval.ISubscription;
+import org.activequant.util.pattern.events.IEventListener;
+import org.activequant.util.tools.UniqueDateGenerator;
 import org.activequant.util.SpecResolver;
+import org.activequant.core.domainmodel.InstrumentSpecification; 
+import org.activequant.broker.BrokerBase; 
+import org.activequant.core.types.SecurityType;
+import org.activequant.core.types.Currency;
 import org.activequant.util.pattern.events.Event;
+import java.util.HashMap;
 /**
  * a jms broker implementation 
  */
@@ -78,7 +92,11 @@ class JMSBroker extends BrokerBase {
 
 	private void fireUnknownExecution(InstrumentSpecification spec, double quantity, double price)
 	{
-		// 
+		//
+		OrderExecutionEvent oe = new OrderExecutionEvent();
+		oe.setPrice(price);
+		oe.setQuantity(quantity);
+		unknownExecutions.fire(oe);
 	}
 
 	@Override

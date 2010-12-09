@@ -44,7 +44,8 @@ public class System5 extends BasicTradeSystem {
 	private Quote formerQuote;
 	private int period1; 
 	private int formerDirection = 0;
-	private double stopLossPnl = 100, currentPosition = 0.0, currentPositionPnl = 0.0; 
+	private double stopLossPnl = -100, currentPosition = 0.0, currentPositionPnl = 0.0; 
+	private double maxPnl = 0.0, minPnl = 0.0; 
 
     protected final static Logger log = Logger.getLogger(System5.class);
 	
@@ -105,7 +106,7 @@ public class System5 extends BasicTradeSystem {
 				candleWriter = new BufferedWriter(new FileWriter("candles.csv")); 	
 				
 				// 
-				pnlLogger3 = new PnlLogger3(new MUCValueReporter(server, login, pass, "System5Pnl", "system5@conference.activequant.org"));
+				pnlLogger3 = new PnlLogger3(new MUCValueReporter(server, login, pass, "System5Pnl", "system5pnl@conference.activequant.org"));
 				
 				// register for the order events. 
 				getOrderEvents().addEventListener(new IEventListener2<Order, OrderEvent>() {				
@@ -181,10 +182,7 @@ public class System5 extends BasicTradeSystem {
 		// 
 		formerQuote = quote; 
 		
-		// log the quote. 
-		if(getAlgoEnv().getRunMode().equals(RunMode.PRODUCTION))
-			pnlLogger3.log(quote);
-		
+	
 		quoteUpdateCount++;
 
 		// aggregating five quotes into one candle (non-time discrete)
@@ -271,19 +269,30 @@ public class System5 extends BasicTradeSystem {
 		{
 			if(lastLow > p1 && formerDirection != 1)
 			{
+			
 				log.info("Detecting a long at "+quote.toString());
 				formerDirection = 1;
 				silentSend("System 5 says long at "+quote.toString());		
+				silentSend("Former max Pnl: "+maxPnl+"\nFormer min Pnl: "+minPnl);
 				setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), 1, quote.getAskPrice());				
+				partialReset();
 			}
 			else if(lastHigh < p1 && formerDirection != -1)
 			{
 				log.info("Detecting a short at "+quote.toString());
 				formerDirection = -1; 
 				silentSend("System 5 says short at "+quote.toString());		
-				setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), -1, quote.getAskPrice());
+				silentSend("Former max Pnl: "+maxPnl+"\nFormer min Pnl: "+minPnl);
+				setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), -1, quote.getBidPrice());
+				partialReset();
 			}
 		}	
+	}
+
+	public void partialReset()
+	{
+		minPnl = 0; 
+		maxPnl = 0; 
 	}
 
 	public void populateReport(SimpleReport report) {
@@ -321,16 +330,22 @@ public class System5 extends BasicTradeSystem {
 			double priceDiff = pos.getPriceDifference(quote);
 			
 			// compute the current pnl
-			currentPositionPnl = Math.abs(currentPosition) * priceDiff; 
-			
+			currentPositionPnl = Math.abs(currentPosition) * priceDiff / quote.getInstrumentSpecification().getTickSize() * quote.getInstrumentSpecification().getTickValue(); 
+			log.info("Current position pnl: "+currentPositionPnl);
+			if(currentPositionPnl > maxPnl) maxPnl = currentPositionPnl;
+			if(currentPositionPnl < minPnl) minPnl = currentPositionPnl;
 			// check if the current pnl is lower than our stop loss pnl 
 			if(currentPositionPnl < stopLossPnl)
 			{
 			    double stopLimitPrice = quote.getBidPrice();
 			    if(currentPosition < 0) stopLimitPrice = quote.getAskPrice();
 			    // liquidate 
+			    silentSend("Stop loss reached: "+currentPositionPnl + " / " +stopLossPnl);
 			    setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), 0, stopLimitPrice);			    
 			}			
+			// log the quote. 
+			if(getAlgoEnv().getRunMode().equals(RunMode.PRODUCTION))
+				pnlLogger3.log(quote);
 		}
 	}
 
