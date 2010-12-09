@@ -2,11 +2,14 @@ package org.activequant.tradesystems;
 
 import org.activequant.broker.IBroker;
 import org.activequant.core.domainmodel.account.BrokerAccount;
+import org.activequant.dao.IFactoryDao;
+import org.activequant.dao.IQuoteDao;
+import org.activequant.dao.ISpecificationDao;
+import org.activequant.dao.hibernate.FactoryLocatorDao;
 import org.activequant.dao.hibernate.QuoteDao;
 import org.activequant.dao.hibernate.SpecificationDao;
 import org.activequant.optimization.domainmodel.AlgoEnvConfig;
 import org.activequant.reporting.IValueReporter;
-import org.activequant.util.spring.ServiceLocator;
 
 /**
  * This class contains all relevant environment parameters, it is strongly comparable to the trade system context of AQ.
@@ -22,13 +25,14 @@ public class AlgoEnvironment {
 	private BrokerAccount brokerAccount;
 	private IValueReporter valueReporter; 
 	private RunMode runMode = RunMode.PRODUCTION;
-	private final SpecificationDao specDao;		
-	private final QuoteDao quoteDao; 
+	private final ISpecificationDao specDao;		
+	private final IQuoteDao quoteDao; 
 	
 	public AlgoEnvironment()
-	{
-		specDao = (org.activequant.dao.hibernate.SpecificationDao) ServiceLocator.instance("data/config.xml").getContext().getBean("specificationDao");
-		quoteDao = (org.activequant.dao.hibernate.QuoteDao) ServiceLocator.instance("data/config.xml").getContext().getBean("quoteDao");
+	{	
+		IFactoryDao factoryDao = new FactoryLocatorDao("data/config.xml");
+		specDao = factoryDao.createSpecificationDao();
+		quoteDao = factoryDao.createQuoteDao();
 	}	
 	public RunMode getRunMode() {
 		return runMode;
