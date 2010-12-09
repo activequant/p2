@@ -153,7 +153,7 @@ public class System5 extends BasicTradeSystem {
 		InstrumentSpecification spec = getAlgoEnv().getSpecDao().find(instrumentId);
 		SeriesSpecification query = new SeriesSpecification(spec);
 		Calendar cal = GregorianCalendar.getInstance();
-		cal.add(Calendar.HOUR, -10);
+		cal.add(Calendar.HOUR, -2);
 		query.setStartTimeStamp(new TimeStamp(cal.getTime()));
 		query.setEndTimeStamp(new TimeStamp(new Date()));
 		// set start and stop time frame. 
