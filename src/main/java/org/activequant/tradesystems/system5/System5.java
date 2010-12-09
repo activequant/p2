@@ -151,6 +151,7 @@ public class System5 extends BasicTradeSystem {
 	public void backfill()
 	{
 		int instrumentId = getAlgoEnv().getAlgoEnvConfig().getInstruments().get(0);		
+		log.info("Loading specification with id "+instrumentId);
 		InstrumentSpecification spec = getAlgoEnv().getSpecDao().find(instrumentId);
 		SeriesSpecification query = new SeriesSpecification(spec);
 		Calendar cal = GregorianCalendar.getInstance();
