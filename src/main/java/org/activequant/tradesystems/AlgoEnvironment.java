@@ -27,8 +27,8 @@ public class AlgoEnvironment {
 	
 	public AlgoEnvironment()
 	{
-		specDao = (org.activequant.dao.hibernate.SpecificationDao) ServiceLocator.instance("activequantdao/config.xml").getContext().getBean("specificationDao");
-		quoteDao = (org.activequant.dao.hibernate.QuoteDao) ServiceLocator.instance("activequantdao/config.xml").getContext().getBean("quoteDao");
+		specDao = (org.activequant.dao.hibernate.SpecificationDao) ServiceLocator.instance("data/config.xml").getContext().getBean("specificationDao");
+		quoteDao = (org.activequant.dao.hibernate.QuoteDao) ServiceLocator.instance("data/config.xml").getContext().getBean("quoteDao");
 	}	
 	public RunMode getRunMode() {
 		return runMode;
