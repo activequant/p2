@@ -14,7 +14,7 @@
     <bean id="jmsConnection" class="org.activequant.util.tempjms.JMS">
     	
 	    <constructor-arg>	    	
-	    		<value>192.168.0.177</value>	  	
+	    		<value>192.168.0.10</value>	  	
 	    </constructor-arg>
 	     <constructor-arg>
 	      		<value>7676</value>	

@@ -73,9 +73,7 @@
 					<reportSet>
 						<reports>
 							<report>index</report>
-							<!--
-								report>dependencies</report> <report>issue-tracking</report
-							-->
+							<!-- report>dependencies</report> <report>issue-tracking</report -->
 							<report>mailing-list</report>
 							<report>scm</report>
 							<report>license</report>
@@ -105,6 +103,17 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+ <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>jboss-maven-plugin</artifactId>
+        <version>1.4.1</version>
+        <configuration>
+          <jbossHome>/opt/jboss-6.0.0.Final</jbossHome>
+          <serverName>all</serverName>
+          <fileName>target/my-project.war</fileName>
+        </configuration>
+      </plugin>
+
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
@@ -286,15 +295,25 @@
 			<artifactId>log4j</artifactId>
 			<version>1.2.16</version>
 		</dependency>
+		<dependency>
+			<groupId>javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.4.GA</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-cglib-repack</artifactId>
+			<version>2.1_3</version>
+			<optional>true</optional>
+		</dependency>
 
 		<!-- JDBC driver (runtime dependency) -->
 
 		<!-- Uncomment following lines if using Derby -->
-		<!--
-			Uncomment following lines if using PostgreSQL <dependency>
-			<groupId>postgresql</groupId> <artifactId>postgresql</artifactId>
-			<version>8.3-603.jdbc4</version> <scope>runtime</scope> </dependency>
-		-->
+		<!-- Uncomment following lines if using PostgreSQL <dependency> <groupId>postgresql</groupId> 
+			<artifactId>postgresql</artifactId> <version>8.3-603.jdbc4</version> <scope>runtime</scope> 
+			</dependency> -->
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty</artifactId>
@@ -311,9 +330,9 @@
 			<version>2.1_3</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.baulsupp.kolja</groupId>
-		    <artifactId>jcurses</artifactId>
-		    <version>0.9.5.3</version>
+			<groupId>com.baulsupp.kolja</groupId>
+			<artifactId>jcurses</artifactId>
+			<version>0.9.5.3</version>
 		</dependency>
 	</dependencies>
 </project>

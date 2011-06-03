@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
-<beans>
+<beans  xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:si="http://www.springframework.org/schema/integration"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/integration
+          http://www.springframework.org/schema/integration/spring-integration-1.0.xsd">
+
 	<import resource="classpath:core/converters.xml" />
 	<import resource="classpath:activequantdao/dao-hibernate.xml" />
 	
-	<bean id="tickArchiveDao" class="org.activequant.util.RecorderTradeIndicationDao">
-		<constructor-arg>
-		<value>/home/share/archive</value>
-		</constructor-arg>
-	</bean>
 	
 	<bean id="tickSourceJms" class="org.activequant.util.tempjms.JMSTradeIndicationSubscriptionSource">
-		<constructor-arg><value>localhost</value></constructor-arg>
+		<constructor-arg><value>192.168.0.103</value></constructor-arg>
 		<constructor-arg><value>7676</value></constructor-arg>
 	</bean>
 	
@@ -19,7 +20,7 @@
 	<bean id="context" class="org.activequant.util.TradeIndicationRecorder"
 		init-method="record">
 		<property name="source" ref="tickSourceJms" />
-		<property name="dao" ref="tickArchiveDao" />
+		<property name="dao" ref="tickDao" />
 		<property name="specDao" ref="specificationDao" />
 	</bean>
 </beans>

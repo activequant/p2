@@ -21,6 +21,8 @@ import org.activequant.core.types.TimeFrame;
 import org.activequant.core.types.TimeStamp;
 import org.activequant.math.algorithms.EMAAccumulator;
 import org.activequant.optimization.domainmodel.AlgoConfig;
+import org.activequant.persistence.TradeStatistics;
+import org.activequant.persistence.TradeStatisticsDao;
 import org.activequant.reporting.MUCValueReporter;
 import org.activequant.reporting.PnlLogger3;
 import org.activequant.tradesystems.AlgoEnvironment;
@@ -47,9 +49,10 @@ public class System5 extends BasicTradeSystem {
 	private double stopLossPnl = -100, currentPosition = 0.0,
 			currentPositionPnl = 0.0;
 	private double maxPnl = 0.0, minPnl = 0.0;
-
+	private long tradeId =0; 
 	protected final static Logger log = Logger.getLogger(System5.class);
 
+	private TradeStatistics ts;
 	private List<Double> lows = new ArrayList<Double>();
 	private List<Double> highs = new ArrayList<Double>();
 	private List<Double> opens = new ArrayList<Double>();
@@ -66,15 +69,19 @@ public class System5 extends BasicTradeSystem {
 
 	private int quoteUpdateCount = 0;
 	private boolean tradeFlag = true;
+	private TradeStatisticsDao tradeStatisticsDao;
+	private String sessionId; 
+
 
 	@Override
 	public boolean initialize(AlgoEnvironment algoEnv, AlgoConfig algoConfig) {
 		super.initialize(algoEnv, algoConfig);
+		sessionId = "SESSION_"+System.currentTimeMillis();
 		period1 = 7;
 		emaAcc.setPeriod(period1);
 		try {
 			if (algoEnv.getRunMode().equals(RunMode.PRODUCTION)) {
-
+				tradeStatisticsDao = new TradeStatisticsDao();
 				// do the backfill
 				backfill();
 				//
@@ -143,7 +150,7 @@ public class System5 extends BasicTradeSystem {
 			ex.printStackTrace();
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -228,7 +235,7 @@ public class System5 extends BasicTradeSystem {
 		quoteUpdateCount++;
 
 		// aggregating five quotes into one candle (non-time discrete)
-		if (quoteUpdateCount == 10) {
+		if (quoteUpdateCount == 100) {
 			quoteUpdateCount = 0;
 			lows.add(low);
 			opens.add(open);
@@ -276,6 +283,8 @@ public class System5 extends BasicTradeSystem {
 
 		// processing high and low.
 		double p1 = emaAcc.getMeanValue();
+		double lastOpen = opens.get(closes.size() - 1);
+		double lastClose = closes.get(closes.size() - 1);
 		double lastLow = lows.get(closes.size() - 1);
 		double lastHigh = highs.get(closes.size() - 1);
 		log.info("Calc output: " + p1 + " <> L:" + lastLow + " <> H:"
@@ -303,8 +312,11 @@ public class System5 extends BasicTradeSystem {
 
 		//
 		if (p1 > 0.0) {
-			if (lastLow > p1 && formerDirection != 1) {
-
+			if (lastLow >  p1 && lastOpen < lastClose && formerDirection != 1) {
+				tradeId++;
+				ts = new TradeStatistics(System.currentTimeMillis(),"LONG");
+				ts.setTradeId(tradeId);
+				ts.setSessionId(sessionId);
 				log.info("Detecting a long at " + quote.toString());
 				formerDirection = 1;
 				silentSend("System 5 says long at " + quote.toString());
@@ -314,7 +326,11 @@ public class System5 extends BasicTradeSystem {
 						quote.getInstrumentSpecification(), 1,
 						quote.getAskPrice());
 				partialReset();
-			} else if (lastHigh < p1 && formerDirection != -1) {
+			} else if (lastHigh < p1 && lastClose < lastOpen && formerDirection != -1) {
+				tradeId++;
+				ts = new TradeStatistics(System.currentTimeMillis(),"SHORT");
+				ts.setTradeId(tradeId);
+				ts.setSessionId(sessionId);
 				log.info("Detecting a short at " + quote.toString());
 				formerDirection = -1;
 				silentSend("System 5 says short at " + quote.toString());
@@ -370,11 +386,18 @@ public class System5 extends BasicTradeSystem {
 			currentPositionPnl = Math.abs(currentPosition) * priceDiff
 					/ quote.getInstrumentSpecification().getTickSize()
 					* quote.getInstrumentSpecification().getTickValue();
+			ts.setLastPnl(currentPositionPnl);
+			ts.setLastQuoteTimeStampMs(System.currentTimeMillis());
 			log.info("Current position pnl: " + currentPositionPnl);
-			if (currentPositionPnl > maxPnl)
+			if (currentPositionPnl > maxPnl) {
 				maxPnl = currentPositionPnl;
-			if (currentPositionPnl < minPnl)
+				ts.setMaxPnl(maxPnl);
+			}
+			if (currentPositionPnl < minPnl) {
 				minPnl = currentPositionPnl;
+				ts.setMinPnl(minPnl);
+			}
+			tradeStatisticsDao.persist(ts);
 			// check if the current pnl is lower than our stop loss pnl
 			if (currentPositionPnl < stopLossPnl) {
 				double stopLimitPrice = quote.getBidPrice();

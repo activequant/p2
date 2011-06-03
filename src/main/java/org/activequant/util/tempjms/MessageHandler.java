@@ -2,7 +2,7 @@ package org.activequant.util.tempjms;
 
 import java.text.SimpleDateFormat;
 import java.util.concurrent.LinkedBlockingQueue;
-
+import java.util.Date;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
@@ -10,7 +10,7 @@ import javax.jms.TextMessage;
 import org.activequant.core.domainmodel.InstrumentSpecification;
 import org.activequant.core.domainmodel.data.Quote;
 import org.activequant.core.domainmodel.data.TradeIndication;
-
+import org.activequant.core.types.TimeStamp;
 import org.apache.log4j.Logger; 
 
 public class MessageHandler implements MessageListener {
@@ -92,17 +92,12 @@ public class MessageHandler implements MessageListener {
 	}
 	private void handleTickLine(String aCsvDataLine)
 	{
-	}
-	
-	private void handleQuoteLine(String aCsvDataLine)
-	{
-		Quote myQuote = new Quote();
-		// setting the instrument specification
-		myQuote.setInstrumentSpecification(spec);
+		TradeIndication tick = new TradeIndication();
+		tick.setInstrumentSpecification(spec);
 		if(logger.isDebugEnabled()){
 			logger.debug("Parsing CSV line: "+aCsvDataLine);
 		}
-		Long myTime = null;
+		Long myTime = 0L;
 		String[] myDataEntries = aCsvDataLine.split(",");
 		for (String myDataEntry : myDataEntries) {
 			String[] myData = myDataEntry.split("=");
@@ -129,6 +124,56 @@ public class MessageHandler implements MessageListener {
 					}
 
 					long myLocalTime = System.currentTimeMillis();
+					tick.setTimeStamp(new TimeStamp(new Date(myTime)));
+					tick.setReceivedTimeStamp(new TimeStamp());		
+				} else {
+					Double myValue = Double.parseDouble(myData[1]);
+					if(myKey.endsWith("PRICE")) tick.setPrice(myValue);
+					else if(myKey.endsWith("VOLUME")) tick.setQuantity(myValue);
+				}
+			}
+		}
+		if(source2!=null)
+			source2.distributeTradeIndication(tick);
+	}
+	
+	private void handleQuoteLine(String aCsvDataLine)
+	{
+		Quote myQuote = new Quote();
+		// setting the instrument specification
+		myQuote.setInstrumentSpecification(spec);
+		if(logger.isDebugEnabled()){
+			logger.debug("Parsing CSV line: "+aCsvDataLine);
+		}
+		Long myTime = 0L;
+		String[] myDataEntries = aCsvDataLine.split(",");
+		for (String myDataEntry : myDataEntries) {
+			String[] myData = myDataEntry.split("=");
+			if (myData.length == 2 && !myData[1].equals("")) {
+				String myKey = myData[0];
+				// System.out.println(myKey);
+				if (myKey.equals("TIME")) {
+					// time parsing. 
+					try {
+						myTime = Long.parseLong(myData[1]);
+					} catch (Exception anEx) {
+					}
+					try {
+						SimpleDateFormat mySdf = new SimpleDateFormat("yyyy-MM-dd");
+						myTime = mySdf.parse(myData[1]).getTime();
+						System.out.println("Parsed: " + myTime);
+					} catch (Exception anEx) {
+					}
+					try {
+						SimpleDateFormat mySdf = new SimpleDateFormat("MM/dd/yyyy hh:mm");
+						myTime = mySdf.parse(myData[1]).getTime();
+						System.out.println("Parsed: " + myTime);
+					} catch (Exception anEx) {
+					}
+
+					long myLocalTime = System.currentTimeMillis();
+					myQuote.setTimeStamp(new TimeStamp(new Date(myTime)));
+					myQuote.setReceivedTimeStamp(new TimeStamp());		
 				
 				} else {
 					Double myValue = Double.parseDouble(myData[1]);
@@ -139,10 +184,7 @@ public class MessageHandler implements MessageListener {
 				}
 			}
 		}
-		if(myQuote.getBidPrice()!=Quote.NOT_SET)
-		{
-			source1.distributeQuote(myQuote);
-		}
+		if(source1!=null)source1.distributeQuote(myQuote);
 
 	}
 

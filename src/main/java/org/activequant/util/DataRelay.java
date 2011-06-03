@@ -52,6 +52,7 @@ class DataRelay {
 	private int theQuoteCount;
 	private int theTickCount;
 
+	private Hashtable<Long, Quote> currentQuotes = new Hashtable<Long, Quote>();
 	private int theListenerPort = 22223;
 	private String theJmsEndPoint = "";
 	private int theJmsPort = 7676;
@@ -76,10 +77,17 @@ class DataRelay {
 		return jms;
 	}
 
+	public Hashtable<Long,  Quote> getCurrentQuotes(){return currentQuotes; }
+
 	private void startListenerSocket() throws Exception {
 		log.info("Settings: ");
 		log.info("ListnerPort " + theListenerPort);
 		ServerSocket listenerSocket = new ServerSocket(theListenerPort);
+		Socket hackSocket = new Socket("192.168.0.116", 22225);
+		hackSocket.getOutputStream().write("DATARELAY\n".getBytes());
+		hackSocket.getOutputStream().flush();
+		new Thread(new WorkerThread(this, hackSocket)).start();
+
 		Socket mySocket;
 		while (!quit) {
 			mySocket = listenerSocket.accept();
@@ -89,7 +97,7 @@ class DataRelay {
 	}
 
 	public static void main(String[] args) throws Exception {
-		DataRelay myRelay = new DataRelay("localhost", 7676);
+		DataRelay myRelay = new DataRelay("192.168.0.103", 7676);
 		myRelay.startRelay();
 	}
 
@@ -277,6 +285,19 @@ class WorkerThread implements Runnable {
 			myQuote.setTimeStamp(new TimeStamp(nanoseconds));
 			myQuote.setInstrumentSpecification(theRelay.getSpec(myInstrumentParts[0], myInstrumentParts[1], myInstrumentParts[2],
 					myInstrumentParts[3]));
+
+			Long iid = myQuote.getInstrumentSpecification().getId();
+			Quote refQuote = null;
+			if(theRelay.getCurrentQuotes().containsKey(iid))
+			{
+				refQuote = theRelay.getCurrentQuotes().get(iid);
+				if(refQuote.getBidPrice()==myQuote.getBidPrice() && refQuote.getAskPrice() == myQuote.getAskPrice() && refQuote.getBidQuantity() == myQuote.getBidQuantity() && refQuote.getAskQuantity() == myQuote.getAskQuantity()){
+					log.debug("Dropping quote.");
+					return;
+				}
+			}
+			theRelay.getCurrentQuotes().put(iid, myQuote);
+
 			theRelay.increaseQuoteCount();
 			// hardcore send out direct.
 			String myTopic = getTopicName(myQuote.getInstrumentSpecification());

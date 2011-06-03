@@ -24,7 +24,7 @@ public class AlgoEnvConfigSystem5a extends AlgoEnvConfig {
 		
 		// set, to which instrument to subscribe to. 
 		// local instrument id, can differ across machines. 
-		setInstruments(ArrayUtils.asList(new Integer[] { 85 }));
+		setInstruments(ArrayUtils.asList(new Integer[] { 184 }));
 		
 		// create algo config and set it. 
 		AlgoConfig ac = new AlgoConfig();

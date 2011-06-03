@@ -113,7 +113,6 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 		system = clazz2.newInstance();
 
 		
-		
 		// configure trade system through algo env config
 		AlgoEnvironment algoEnv = new AlgoEnvironment();
 		algoEnv.setBroker(broker);
