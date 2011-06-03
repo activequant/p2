@@ -37,7 +37,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
  * It takes a class name as parameter and instantiates the class behind this classname
  * , assuming that the class name points to an algo env config. 
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  * 
  * 
  */

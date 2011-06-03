@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
  * The SimConfigFileBacktester will load a simulation configuration file and simulate it. 
  * It uses the SimpleSerializer to load this application.  
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  *
  */
 public class SimConfigFileBacktester {

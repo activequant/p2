@@ -54,10 +54,6 @@ class DataRelay {
 
 	private Hashtable<Long, Quote> currentQuotes = new Hashtable<Long, Quote>();
 	private int theListenerPort = 22223;
-	private String theJmsEndPoint = "";
-	private int theJmsPort = 7676;
-	private String theJmsUserName = "username";
-	private String theJmsPassword = "password";
 	private JMS jms;
 	private boolean quit = false;
 
@@ -77,16 +73,27 @@ class DataRelay {
 		return jms;
 	}
 
-	public Hashtable<Long,  Quote> getCurrentQuotes(){return currentQuotes; }
+	public Hashtable<Long, Quote> getCurrentQuotes() {
+		return currentQuotes;
+	}
 
 	private void startListenerSocket() throws Exception {
 		log.info("Settings: ");
 		log.info("ListnerPort " + theListenerPort);
 		ServerSocket listenerSocket = new ServerSocket(theListenerPort);
-		Socket hackSocket = new Socket("192.168.0.116", 22225);
-		hackSocket.getOutputStream().write("DATARELAY\n".getBytes());
-		hackSocket.getOutputStream().flush();
-		new Thread(new WorkerThread(this, hackSocket)).start();
+		
+		try{
+			// Note: this is just a hacky way for my personal internal network at work. // GhostRider. 
+			// No harm and not needed for anyone else. 
+			Socket hackSocket = new Socket("192.168.0.116", 22225);
+			hackSocket.getOutputStream().write("DATARELAY\n".getBytes());
+			hackSocket.getOutputStream().flush();
+			new Thread(new WorkerThread(this, hackSocket)).start();
+		}
+		catch(Exception ex)
+		{
+			
+		}
 
 		Socket mySocket;
 		while (!quit) {
@@ -97,7 +104,8 @@ class DataRelay {
 	}
 
 	public static void main(String[] args) throws Exception {
-		DataRelay myRelay = new DataRelay("192.168.0.103", 7676);
+		DataRelay myRelay = new DataRelay( System.getProperties().getProperty("JMS_HOST"),  
+				Integer.parseInt(System.getProperties().getProperty("JMS_PORT", "7676")));
 		myRelay.startRelay();
 	}
 
@@ -117,7 +125,8 @@ class DataRelay {
 		this.theListenerPort = theListenerPort;
 	}
 
-	public synchronized InstrumentSpecification getSpec(String aSymbol, String anExchange, String aCurrency, String aVendor) {
+	public synchronized InstrumentSpecification getSpec(String aSymbol,
+			String anExchange, String aCurrency, String aVendor) {
 
 		String myKey = aSymbol + anExchange + aCurrency;
 		if (!theSpecCache.containsKey(myKey)) {
@@ -131,23 +140,22 @@ class DataRelay {
 			myExampleSpec.setTickSize(0.25);
 			myExampleSpec.setTickValue(12.5);
 
-
 			InstrumentSpecification[] specs = specDao.findAll();
-			InstrumentSpecification spec = null; 
-			for(InstrumentSpecification s : specs)
-			{
-				log.info("Comparing: "+s.getSymbol().toString()+" // "+s.getCurrency().toString() + " // " + s.getExchange().toString()+ " // " +s.getVendor());
-				log.info("Against: "+ aSymbol + " // " + anExchange + " // " + aCurrency + " // " + aVendor);
-				if(s.getSymbol().toString().equals(aSymbol) &&
-					s.getCurrency().toString().equals(aCurrency) &&
-					s.getExchange().toString().equals(anExchange) &&
-					s.getVendor().toString().equals(aVendor))
-				{
-					spec = s; 
+			InstrumentSpecification spec = null;
+			for (InstrumentSpecification s : specs) {
+				log.info("Comparing: " + s.getSymbol().toString() + " // "
+						+ s.getCurrency().toString() + " // "
+						+ s.getExchange().toString() + " // " + s.getVendor());
+				log.info("Against: " + aSymbol + " // " + anExchange + " // "
+						+ aCurrency + " // " + aVendor);
+				if (s.getSymbol().toString().equals(aSymbol)
+						&& s.getCurrency().toString().equals(aCurrency)
+						&& s.getExchange().toString().equals(anExchange)
+						&& s.getVendor().toString().equals(aVendor)) {
+					spec = s;
 					break;
-				}	
+				}
 			}
-		
 
 			if (spec == null) {
 				myExampleSpec.setLotSize(1);
@@ -165,7 +173,7 @@ class DataRelay {
 }
 
 class WorkerThread implements Runnable {
-        protected final static Logger log = Logger.getLogger(WorkerThread.class);
+	protected final static Logger log = Logger.getLogger(WorkerThread.class);
 
 	WorkerThread(DataRelay aRelay, Socket aSocket) throws Exception {
 		theRelay = aRelay;
@@ -175,9 +183,14 @@ class WorkerThread implements Runnable {
 	private MessageProducer getProducer(String aTopic) throws Exception {
 		log.debug("getting mp");
 		if (!theProducers.containsKey(aTopic)) {
-			theProducers.put(aTopic, theRelay.getJms().getMessageProducer().createPublisher(
-					theRelay.getJms().getMessageProducer().createTopic(aTopic)));
-			log.info("Creating new producer for topic "+aTopic);
+			theProducers.put(
+					aTopic,
+					theRelay.getJms()
+							.getMessageProducer()
+							.createPublisher(
+									theRelay.getJms().getMessageProducer()
+											.createTopic(aTopic)));
+			log.info("Creating new producer for topic " + aTopic);
 		}
 		log.debug("returning mp");
 		return theProducers.get(aTopic);
@@ -185,11 +198,11 @@ class WorkerThread implements Runnable {
 
 	private TextMessage getTextMessage(String aTopic) throws Exception {
 		log.debug("getting text message.");
-		if (!theMessages.containsKey(aTopic))
-		{
-			theMessages.put(aTopic, theRelay.getJms().getMessageProducer().createTextMessage());
-		
-		}	
+		if (!theMessages.containsKey(aTopic)) {
+			theMessages.put(aTopic, theRelay.getJms().getMessageProducer()
+					.createTextMessage());
+
+		}
 		log.debug("Returning text message.");
 		return theMessages.get(aTopic);
 
@@ -204,7 +217,7 @@ class WorkerThread implements Runnable {
 	private Hashtable<String, TextMessage> theMessages = new Hashtable<String, TextMessage>();
 
 	private void handleLine(String aLine) throws Exception {
-	//	System.out.println(aLine);
+		// System.out.println(aLine);
 		String[] parts = aLine.split(";");
 		String type = parts[0];
 
@@ -212,64 +225,60 @@ class WorkerThread implements Runnable {
 			handleTick(parts);
 		} else if (type.equals("Q")) {
 			handleQuote(parts);
-		}
-		else if(type.equals("OE")){
+		} else if (type.equals("OE")) {
 			handleOE(parts, aLine);
 		}
 	}
 
 	private void handleOE(String[] parts, String msg) throws Exception {
-		try{
-	                String[] myInstrumentParts = parts[1].split(",");
-			InstrumentSpecification spec = theRelay.getSpec(myInstrumentParts[0], myInstrumentParts[1], myInstrumentParts[2],
-                                myInstrumentParts[3]);
+		try {
+			String[] myInstrumentParts = parts[1].split(",");
+			InstrumentSpecification spec = theRelay.getSpec(
+					myInstrumentParts[0], myInstrumentParts[1],
+					myInstrumentParts[2], myInstrumentParts[3]);
 			String myTopic = getTopicName(spec);
 			TextMessage textMessage = getTextMessage(myTopic);
 			textMessage.setText(msg);
 			getProducer(myTopic).send(textMessage);
-		}
-		catch(Exception ex)
-		{	
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
 
 	private void handleTick(String[] parts) throws Exception {
-		try
-		{
-		long nanoseconds = Long.parseLong(parts[1]);
-		String[] myInstrumentParts = parts[2].split(",");
-		log.debug("New tick: "+parts[2]);
+		try {
+			long nanoseconds = Long.parseLong(parts[1]);
+			String[] myInstrumentParts = parts[2].split(",");
+			log.debug("New tick: " + parts[2]);
 
-		double tradedPrice = Double.parseDouble(parts[3]);
-		double tradedVolume = Double.parseDouble(parts[4]);
+			double tradedPrice = Double.parseDouble(parts[3]);
+			double tradedVolume = Double.parseDouble(parts[4]);
 
-		TradeIndication myTick = new TradeIndication();
-		myTick.setTimeStamp(new TimeStamp(nanoseconds));
-		myTick.setPrice(tradedPrice);
-		myTick.setQuantity(tradedVolume);
-		myTick.setInstrumentSpecification(theRelay.getSpec(myInstrumentParts[0], myInstrumentParts[1], myInstrumentParts[2],
-				myInstrumentParts[3]));
-		String myTopic = getTopicName(myTick.getInstrumentSpecification());
-		String line = ("TIME="+System.currentTimeMillis()+",MAIN/"+myTopic+"/PRICE="+tradedPrice+",MAIN/"+myTopic+"/VOLUME="+tradedVolume);
+			TradeIndication myTick = new TradeIndication();
+			myTick.setTimeStamp(new TimeStamp(nanoseconds));
+			myTick.setPrice(tradedPrice);
+			myTick.setQuantity(tradedVolume);
+			myTick.setInstrumentSpecification(theRelay.getSpec(
+					myInstrumentParts[0], myInstrumentParts[1],
+					myInstrumentParts[2], myInstrumentParts[3]));
+			String myTopic = getTopicName(myTick.getInstrumentSpecification());
+			String line = ("TIME=" + System.currentTimeMillis() + ",MAIN/"
+					+ myTopic + "/PRICE=" + tradedPrice + ",MAIN/" + myTopic
+					+ "/VOLUME=" + tradedVolume);
 			TextMessage myMessage = getTextMessage(myTopic);
 			myMessage.setText(line);
 			log.debug("Pushing text message.");
 			getProducer(myTopic).send(myMessage);
-			// hardcore avoid for now.
-			// theTickPublisher.publish(myTick);
-			//theRelay.increaseTickCount();
+			theRelay.increaseTickCount();
 			log.debug("Tick published");
-		}
-		catch(Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
 
 	private void handleQuote(String[] parts) throws Exception {
 		try {
-			log.debug("New quote: "+parts[2]);
+			log.debug("New quote: " + parts[2]);
 			long nanoseconds = Long.parseLong(parts[1]);
 			String[] myInstrumentParts = parts[2].split(",");
 			double bidPrice = Double.parseDouble(parts[3]);
@@ -283,15 +292,20 @@ class WorkerThread implements Runnable {
 			myQuote.setAskPrice(askPrice);
 			myQuote.setAskQuantity(askVolume);
 			myQuote.setTimeStamp(new TimeStamp(nanoseconds));
-			myQuote.setInstrumentSpecification(theRelay.getSpec(myInstrumentParts[0], myInstrumentParts[1], myInstrumentParts[2],
-					myInstrumentParts[3]));
+			myQuote.setInstrumentSpecification(theRelay.getSpec(
+					myInstrumentParts[0], myInstrumentParts[1],
+					myInstrumentParts[2], myInstrumentParts[3]));
 
 			Long iid = myQuote.getInstrumentSpecification().getId();
 			Quote refQuote = null;
-			if(theRelay.getCurrentQuotes().containsKey(iid))
-			{
+			if (theRelay.getCurrentQuotes().containsKey(iid)) {
 				refQuote = theRelay.getCurrentQuotes().get(iid);
-				if(refQuote.getBidPrice()==myQuote.getBidPrice() && refQuote.getAskPrice() == myQuote.getAskPrice() && refQuote.getBidQuantity() == myQuote.getBidQuantity() && refQuote.getAskQuantity() == myQuote.getAskQuantity()){
+				if (refQuote.getBidPrice() == myQuote.getBidPrice()
+						&& refQuote.getAskPrice() == myQuote.getAskPrice()
+						&& refQuote.getBidQuantity() == myQuote
+								.getBidQuantity()
+						&& refQuote.getAskQuantity() == myQuote
+								.getAskQuantity()) {
 					log.debug("Dropping quote.");
 					return;
 				}
@@ -301,13 +315,16 @@ class WorkerThread implements Runnable {
 			theRelay.increaseQuoteCount();
 			// hardcore send out direct.
 			String myTopic = getTopicName(myQuote.getInstrumentSpecification());
-			String myLine = ("TIME=" + System.currentTimeMillis() + ",MAIN/" + myTopic + "/BID=" + myQuote.getBidPrice() + ",MAIN/"
-					+ myTopic + "/ASK=" + myQuote.getAskPrice() + ",MAIN/" + myTopic + "/BIDVOL=" + myQuote.getBidQuantity() + ",MAIN/"
-					+ myTopic + "/ASKVOL=" + myQuote.getAskQuantity());
+			String myLine = ("TIME=" + System.currentTimeMillis() + ",MAIN/"
+					+ myTopic + "/BID=" + myQuote.getBidPrice() + ",MAIN/"
+					+ myTopic + "/ASK=" + myQuote.getAskPrice() + ",MAIN/"
+					+ myTopic + "/BIDVOL=" + myQuote.getBidQuantity()
+					+ ",MAIN/" + myTopic + "/ASKVOL=" + myQuote
+					.getAskQuantity());
 			log.debug("Getting text message.");
 			TextMessage myMessage = getTextMessage(myTopic);
 			myMessage.setText(myLine);
-			log.debug("Pushing text message to topic "+myTopic);
+			log.debug("Pushing text message to topic " + myTopic);
 			getProducer(myTopic).send(myMessage);
 			log.debug("Message published.");
 			// theQuotePublisher.publish(myQuote);
@@ -329,19 +346,21 @@ class WorkerThread implements Runnable {
 		try {
 			ReadThread myT = new ReadThread();
 			myT.theWorkerThread = this;
-			myT.myBr = new BufferedReader(new InputStreamReader(theSocket.getInputStream()));
+			myT.myBr = new BufferedReader(new InputStreamReader(
+					theSocket.getInputStream()));
 			Thread myTh = new Thread(myT);
 			myTh.start();
 			while (true) {
-				log.debug("Taking line ...");	
+				log.debug("Taking line ...");
 				String myL = theQueue.take();
-				try { 
+				try {
 					handleLine(myL);
-				} catch(Exception ex) {
-					log.warn("Exception while reading line: "+myL);		
+				} catch (Exception ex) {
+					log.warn("Exception while reading line: " + myL);
 					ex.printStackTrace();
 				}
-				// System.out.println("[" + new Date() + "] Queue length: " + theQueue.size());
+				// System.out.println("[" + new Date() + "] Queue length: " +
+				// theQueue.size());
 			}
 		} catch (Exception anEx) {
 			anEx.printStackTrace();
@@ -357,13 +376,13 @@ class WorkerThread implements Runnable {
 /**
  * reads from socket and puts it back to the worker ...
  * 
- * @author ulst
+ * @author GhostRider
  * 
  */
 class ReadThread implements Runnable {
 	WorkerThread theWorkerThread;
 	BufferedReader myBr;
-        protected final static Logger log = Logger.getLogger(ReadThread.class);
+	protected final static Logger log = Logger.getLogger(ReadThread.class);
 
 	public void run() {
 		try {
@@ -378,7 +397,7 @@ class ReadThread implements Runnable {
 				}
 			}
 		} catch (Exception anEx) {
-			log.warn(""+anEx);
+			log.warn("" + anEx);
 			anEx.printStackTrace();
 		}
 

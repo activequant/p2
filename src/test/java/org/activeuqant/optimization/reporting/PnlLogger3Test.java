@@ -53,7 +53,7 @@ public class PnlLogger3Test {
 	}
 	
 	/**	
-	 * @author ulst
+	 * @author GhostRider
 	 */
 	private class TestValueReporter implements IValueReporter {
 		TimeStamp lastTimeStamp; 

@@ -19,7 +19,7 @@ import org.activequant.core.types.TimeStamp;
  * <br>
  * 	CsvFileValueReporter csvVals = new CsvFileValueReporter(fileName);<br>
  *  csvVals.report(timeStamp, "key", 1.0);<br>
- * @author Ulrich Staudinger
+ * @author GhostRider
  * 
  */
 public class CsvFileValueReporter implements IValueReporter {

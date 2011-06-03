@@ -10,7 +10,7 @@ import org.activequant.util.log.LoggerBase;
 
 /**
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  * 
  */
 public class DispatchingLogger extends LoggerBase {

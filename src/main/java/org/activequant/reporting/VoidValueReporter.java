@@ -6,7 +6,7 @@ import org.activequant.core.types.TimeStamp;
 /**
  * The void value reporter does no reporting at all. 
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  *
  */
 public class VoidValueReporter implements IValueReporter {

@@ -38,7 +38,7 @@ import org.apache.log4j.Logger;
  * <b>History:</b><br>
  * - [09.11.2007] Created (Mike Kroutikov)<br>
  * - [26.11.2007] Making class public as required by
- * http://opensource.atlassian.com/projects/spring/browse/SPR-3270 (Ulrich
+ * http://opensource.atlassian.com/projects/spring/browse/SPR-3270 (GhostRider
  * Staudinger)<br>
  * 
  * @author Mike Kroutikov

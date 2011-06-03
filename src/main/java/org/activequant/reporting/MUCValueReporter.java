@@ -8,7 +8,7 @@ import org.jivesoftware.smackx.muc.MultiUserChat;
 /**
  * Logs values to an XMPP MUC.
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  * 
  */
 public class MUCValueReporter implements IValueReporter {

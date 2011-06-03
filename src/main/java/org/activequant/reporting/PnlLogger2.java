@@ -18,7 +18,7 @@ import org.activequant.util.log.LoggerBase;
 
 /**
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  * 
  */
 public class PnlLogger2 extends LoggerBase {

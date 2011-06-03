@@ -21,7 +21,7 @@ import org.activequant.util.tools.UniqueDateGenerator;
  * internal class for quote subscriptions ...
  * ActiveQuant conformity requires to have a class for quote subscription sources ... 
  *
- * @author ulst
+ * @author GhostRider
  * 
  */
 public class InternalTradeIndicationSubscriptionSource implements ITradeIndicationSubscriptionSource {
@@ -29,7 +29,7 @@ public class InternalTradeIndicationSubscriptionSource implements ITradeIndicati
 	/**
 	 * not 100% conform implementation ... but should work.
 	 * 
-	 * @author ulst
+	 * @author GhostRider
 	 * 
 	 */
 	class Subscription implements ISubscription<TradeIndication> {

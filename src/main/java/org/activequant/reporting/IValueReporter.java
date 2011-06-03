@@ -5,7 +5,7 @@ import org.activequant.core.types.TimeStamp;
 /**
  * Can be used to report a value from a trade system. 
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  *
  */
 public interface IValueReporter {

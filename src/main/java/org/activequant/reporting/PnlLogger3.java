@@ -15,7 +15,7 @@ import org.activequant.util.log.LoggerBase;
 
 /**
  * 
- * @author ulst
+ * @author GhostRider
  * 
  */
 public class PnlLogger3 extends LoggerBase {

@@ -21,7 +21,7 @@ import org.activequant.util.tools.UniqueDateGenerator;
  * instrument specifications and candleizes these. 
  * These candles are stored through a CandleDao, for example RecorderCandleDao. 
  * <p>
- * History: <br> - [27.09.2009] Created (Ulrich Staudinger)<br>
+ * History: <br> - [27.09.2009] Created (GhostRider)<br>
  * 
  */
 

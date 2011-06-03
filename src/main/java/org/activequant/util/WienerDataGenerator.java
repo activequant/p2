@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
  * application.
  * 
  * 
- * @author Ulrich Staudinger.
+ * @author GhostRider.
  */
 class WienerDataGenerator {
 

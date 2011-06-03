@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
  * retrieves a simulation configuration from it and simulates it. 
  * This class does not take a file, but works fully in memory.
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  *
  */
 public class SingleSimConfigSourceBacktester {

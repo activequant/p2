@@ -42,20 +42,20 @@ import com.tictactec.ta.lib.MInteger;
  * It makes sense to statically import this into your class<br>
  * <br>
  * <b>History:</b><br>
- * - [03.05.2007] Created (Ulrich Staudinger)<br>
+ * - [03.05.2007] Created (GhostRider)<br>
  * - [06.05.2007] Added min, max, priceRange, MEMA, vola (Erik Nijkamp)<br>
  * - [10.05.2007] added wma, sma, rsi, roc, normalizeArray, scale from ccapi2.
- * (Ulrich Staudinger)<br>
- * - [14.11.2007] Added priceSlope (Ulrich Staudinger)<br>
+ * (GhostRider)<br>
+ * - [14.11.2007] Added priceSlope (GhostRider)<br>
  * - [23.11.2007] Adding PivotPoints based on Dan O'Rourke's contribution
- * (Ulrich Staudinger)<br>
- * - [11.01.2007] Adding yield based on Alberto Sfolcini's contribution (Ulrich
+ * (GhostRider)<br>
+ * - [11.01.2007] Adding yield based on Alberto Sfolcini's contribution (GhostRider
  * Staudinger)<br>
- * - [15.01.2007] Adding nondiscrete average computation (Ulrich Staudinger)<br>
- * - [17.04.2008] Adding metastock like functions (Ulrich Staudinger)<br>
+ * - [15.01.2007] Adding nondiscrete average computation (GhostRider)<br>
+ * - [17.04.2008] Adding metastock like functions (GhostRider)<br>
  * <br>
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  * @author Erik Nijkamp
  */
 public class FinancialLibrary2 {

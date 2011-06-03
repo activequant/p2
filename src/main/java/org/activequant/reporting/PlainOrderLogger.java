@@ -16,7 +16,7 @@ import org.activequant.util.log.LoggerBase;
 /**
  * This logger logs only orders and order events.
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  * 
  */
 public class PlainOrderLogger extends LoggerBase {

@@ -25,7 +25,7 @@ import org.activequant.util.tools.UniqueDateGenerator;
  * and candleizes these, when candleized, the last X candles are relayed over a TCP socket to subscribers.  
  * 
  * <p>
- * History: <br> - [24.09.2010] Created (Ulrich Staudinger)<br>
+ * History: <br> - [24.09.2010] Created (GhostRider)<br>
  * 
  */
 

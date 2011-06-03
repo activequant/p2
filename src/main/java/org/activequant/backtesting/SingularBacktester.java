@@ -38,7 +38,7 @@ import org.apache.log4j.Logger;
  * 
  * Backtester. 
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  *
  */
 public class SingularBacktester extends AlgoEnvBase {

@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
  * Requires a srping batch runner config file as main parameter. 
  * Use ./src/main/resources/data/batchrunner.xml as a start. 
  * 
- * @author Ulrich Staudinger
+ * @author GhostRider
  *
  */
 public class BatchRunner {

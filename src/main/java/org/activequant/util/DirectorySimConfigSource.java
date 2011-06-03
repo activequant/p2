@@ -14,7 +14,7 @@ import common.Logger;
 /**
  * TODO: WIP
  * 
- * @author ulst
+ * @author GhostRider
  *
  */
 public class DirectorySimConfigSource {

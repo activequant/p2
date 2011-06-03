@@ -47,10 +47,10 @@ import org.activequant.util.spring.ServiceLocator;
  * collected data is flushed out to the database. Default value is 1000 millis.
  * <br>
  * <b>History:</b><br>
- * - [14.08.2007] Created (ustaudinger)<br>
+ * - [14.08.2007] Created (GhostRider)<br>
  * - [26.10.2007] Added fifo queueing. Some cleanup (Mike Kroutikov)<br>
  * 
- * @author ustaudinger
+ * @author GhostRider
  */
 public class TradeIndicationRecorder extends MarketDataEntityRecorder<TradeIndication> {
 
