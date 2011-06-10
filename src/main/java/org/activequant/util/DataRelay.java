@@ -143,10 +143,10 @@ class DataRelay {
 			InstrumentSpecification[] specs = specDao.findAll();
 			InstrumentSpecification spec = null;
 			for (InstrumentSpecification s : specs) {
-				log.info("Comparing: " + s.getSymbol().toString() + " // "
+				log.debug("Comparing: " + s.getSymbol().toString() + " // "
 						+ s.getCurrency().toString() + " // "
 						+ s.getExchange().toString() + " // " + s.getVendor());
-				log.info("Against: " + aSymbol + " // " + anExchange + " // "
+				log.debug("Against: " + aSymbol + " // " + anExchange + " // "
 						+ aCurrency + " // " + aVendor);
 				if (s.getSymbol().toString().equals(aSymbol)
 						&& s.getCurrency().toString().equals(aCurrency)
@@ -164,7 +164,7 @@ class DataRelay {
 			}
 
 			theSpecCache.put(myKey, spec);
-			log.info("Resolved instrument to id " + spec.getId());
+			log.debug("Resolved instrument to id " + spec.getId());
 		}
 		return theSpecCache.get(myKey);
 
@@ -262,6 +262,7 @@ class WorkerThread implements Runnable {
 					myInstrumentParts[0], myInstrumentParts[1],
 					myInstrumentParts[2], myInstrumentParts[3]));
 			String myTopic = getTopicName(myTick.getInstrumentSpecification());
+			// assemble the line. 
 			String line = ("TIME=" + System.currentTimeMillis() + ",MAIN/"
 					+ myTopic + "/PRICE=" + tradedPrice + ",MAIN/" + myTopic
 					+ "/VOLUME=" + tradedVolume);
