@@ -88,7 +88,7 @@ class DataRelay {
 			Socket hackSocket = new Socket("192.168.0.116", 22225);
 			hackSocket.getOutputStream().write("DATARELAY\n".getBytes());
 			hackSocket.getOutputStream().flush();
-			new Thread(new WorkerThread(this, hackSocket)).start();
+			new Thread(new WorkerThread(this, hackSocket, "HACKSOCK")).start();
 		}
 		catch(Exception ex)
 		{
@@ -102,6 +102,34 @@ class DataRelay {
 		}
 
 	}
+
+	public void disconnected(String socketName)
+	{
+		if(socketName.equals("HACKSOCK")){
+			boolean reconnectSuccess = false; 
+			while(!reconnectSuccess)
+			{
+			 	try{
+		                        // Note: this is just a hacky way for my personal internal network at work. // GhostRider.
+	        	                // No harm and not needed for anyone else.
+					Thread.sleep(15);
+                	        	Socket hackSocket = new Socket("192.168.0.116", 22225);
+	                	        hackSocket.getOutputStream().write("DATARELAY\n".getBytes());
+	                        	hackSocket.getOutputStream().flush();
+		                        new Thread(new WorkerThread(this, hackSocket, "HACKSOCK")).start();
+					reconnectSuccess = true; 
+		                }
+        		        catch(Exception ex)
+                		{
+					ex.printStackTrace();
+	                	}	
+			}
+
+	
+		}
+
+	}
+
 
 	public static void main(String[] args) throws Exception {
 		DataRelay myRelay = new DataRelay( System.getProperties().getProperty("JMS_HOST"),  
@@ -173,7 +201,14 @@ class DataRelay {
 }
 
 class WorkerThread implements Runnable {
-	protected final static Logger log = Logger.getLogger(WorkerThread.class);
+	protected final static Logger log = Logger.getLogger(WorkerThread.class);		
+	private String socketName = null; 
+
+	WorkerThread(DataRelay aRelay, Socket aSocket, String socketName) throws Exception {
+		theRelay = aRelay;
+		theSocket = aSocket;
+		this.socketName = socketName; 
+	}
 
 	WorkerThread(DataRelay aRelay, Socket aSocket) throws Exception {
 		theRelay = aRelay;
@@ -345,8 +380,7 @@ class WorkerThread implements Runnable {
 
 	public void run() {
 		try {
-			ReadThread myT = new ReadThread();
-			myT.theWorkerThread = this;
+			ReadThread myT = new ReadThread(this);
 			myT.myBr = new BufferedReader(new InputStreamReader(
 					theSocket.getInputStream()));
 			Thread myTh = new Thread(myT);
@@ -368,6 +402,15 @@ class WorkerThread implements Runnable {
 		}
 	}
 
+	public void disconnected()
+	{
+		if(this.socketName!=null)
+		{
+			theRelay.disconnected(this.socketName);
+
+		}
+	}
+
 	private DataRelay theRelay;
 	private Socket theSocket;
 	LinkedBlockingQueue<String> theQueue = new LinkedBlockingQueue<String>();
@@ -384,6 +427,12 @@ class ReadThread implements Runnable {
 	WorkerThread theWorkerThread;
 	BufferedReader myBr;
 	protected final static Logger log = Logger.getLogger(ReadThread.class);
+	
+
+	public ReadThread(WorkerThread t)
+	{
+		this.theWorkerThread = t; 
+	}
 
 	public void run() {
 		try {
@@ -401,6 +450,7 @@ class ReadThread implements Runnable {
 			log.warn("" + anEx);
 			anEx.printStackTrace();
 		}
-
+		// read thread terminated ... have to signal paret. 
+		theWorkerThread.disconnected();
 	}
 }
