@@ -1,6 +1,10 @@
 package org.activequant.tradesystems;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.activequant.broker.IBroker;
+import org.activequant.core.domainmodel.InstrumentSpecification;
 import org.activequant.core.domainmodel.account.BrokerAccount;
 import org.activequant.dao.IFactoryDao;
 import org.activequant.dao.IQuoteDao;
@@ -25,15 +29,23 @@ public class AlgoEnvironment {
 	private BrokerAccount brokerAccount;
 	private IValueReporter valueReporter; 
 	private RunMode runMode = RunMode.PRODUCTION;
-	private final ISpecificationDao specDao;		
-	private final IQuoteDao quoteDao; 
+	private ISpecificationDao specDao;		
+	private IQuoteDao quoteDao; 
+	private List<InstrumentSpecification> instrumentSpecs = new ArrayList<InstrumentSpecification>();
+
 	
-	public AlgoEnvironment()
-	{	
-		IFactoryDao factoryDao = new FactoryLocatorDao("data/config.xml");
-		specDao = factoryDao.createSpecificationDao();
-		quoteDao = factoryDao.createQuoteDao();
-	}	
+	public List<InstrumentSpecification> getInstrumentSpecs() {
+		return instrumentSpecs;
+	}
+	public void setInstrumentSpecs(List<InstrumentSpecification> instrumentSpecs) {
+		this.instrumentSpecs = instrumentSpecs;
+	}
+	public void setSpecDao(ISpecificationDao specDao) {
+		this.specDao = specDao;
+	}
+	public void setQuoteDao(IQuoteDao quoteDao) {
+		this.quoteDao = quoteDao;
+	}
 	public RunMode getRunMode() {
 		return runMode;
 	}

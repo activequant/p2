@@ -106,8 +106,13 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 	}
 	
 	
+	
+	
+	
 	/**
+	 * Sets the target position for a specific instrument specification. 
 	 * Logic description:
+	 * 
 	 * 
 	 * @param spec
 	 * @param tgtPosition
@@ -131,6 +136,7 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 				// ...
 				double positionDifference = tgtPosition - currentPosition;
 				for (OrderHistory h : algoEnv.getBrokerAccount().getOrderBook().getOpenHistories()) {
+					if(h.getOrder().getInstrumentSpecification()!=spec)continue; 
 					if (h.getOrder().getOrderSide().equals(OrderSide.BUY)) {
 						if (h.getOrder().getQuantity() <= positionDifference) {
 							positionDifference = positionDifference - h.getOrder().getQuantity();
@@ -176,6 +182,7 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 				// ...
 				double positionDifference = Math.abs(tgtPosition - currentPosition);
 				for (OrderHistory h : algoEnv.getBrokerAccount().getOrderBook().getOpenHistories()) {
+					if(h.getOrder().getInstrumentSpecification()!=spec)continue;
 					if (h.getOrder().getOrderSide().equals(OrderSide.SELL)) {
 						if (h.getOrder().getQuantity() <= positionDifference) {
 							positionDifference = positionDifference - h.getOrder().getQuantity();
@@ -187,7 +194,7 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 							orderTrackers.get(h.getOrder()).cancel();
 						}
 					} else {
-						// cancel any sell order.
+						// cancel any buy order.
 						orderTrackers.get(h.getOrder()).cancel();
 					}
 

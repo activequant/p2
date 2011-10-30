@@ -21,7 +21,7 @@ public class AlgoEnvBase {
 	protected List<Tuple<Long, Long>> convertedStartStopTimes;
 	protected SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
-	public AlgoEnvBase() {
+	protected AlgoEnvBase() {
 		super();
 	}
 

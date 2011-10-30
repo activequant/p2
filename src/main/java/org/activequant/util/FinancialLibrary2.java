@@ -334,6 +334,24 @@ public class FinancialLibrary2 {
 		return value;
 	}
 
+	
+	
+	
+	
+	
+	public static double rEMA(int n, double[] vals) {
+		double value = 0;
+		double exponent = 2 / (double) (n + 1);
+		value = vals[0];
+		for (int i = 0; i < vals.length; i++) {
+			value = (vals[i] * exponent) + (value * (1 - exponent));
+		}
+		return value;
+	}
+
+	
+	
+	
 	public static double volatilityIndex(int p1, int p2, double[][] ohlc, int skipdays) {
 		return volatilityIndex(p1, p2, ohlc[0], ohlc[1], ohlc[2], ohlc[3], skipdays);
 	}

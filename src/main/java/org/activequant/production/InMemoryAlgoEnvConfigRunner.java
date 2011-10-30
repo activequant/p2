@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.activequant.broker.AccountManagingBrokerProxy;
-import org.activequant.broker.IBroker;
-import org.activequant.broker.PaperBroker;
+import org.activequant.broker.IBroker2;
 import org.activequant.core.domainmodel.InstrumentSpecification;
 import org.activequant.core.domainmodel.account.BrokerAccount;
 import org.activequant.core.domainmodel.account.Portfolio;
@@ -18,7 +17,6 @@ import org.activequant.dao.hibernate.FactoryLocatorDao;
 import org.activequant.data.retrieval.IQuoteSubscriptionSource;
 import org.activequant.data.retrieval.ISubscription;
 import org.activequant.optimization.domainmodel.AlgoEnvConfig;
-import org.activequant.reporting.PnlLogger2;
 import org.activequant.reporting.VoidValueReporter;
 import org.activequant.tradesystems.AlgoEnvironment;
 import org.activequant.tradesystems.IBatchTradeSystem;
@@ -50,10 +48,8 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 	protected ISpecificationDao specDao = factoryDao.createSpecificationDao();
 	protected IQuoteSubscriptionSource quoteSubscriptionSource;
 	protected IBatchTradeSystem system;
-	protected BrokerAccount brokerAccount = new BrokerAccount("", "");
-	private PnlLogger2 pnlLog;
-	protected JMS jmsConnection;
-	
+	protected JMS dataConnection;
+	protected IBroker2 broker = null; 
 	/**
 	 * plain constructor
 	 * @param logFile
@@ -61,11 +57,42 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public InMemoryAlgoEnvConfigRunner(String logFile, JMS jmsConnection) throws Exception {
-		// initialize properly. 
-		pnlLog = new PnlLogger2(true, logFile);
-		this.jmsConnection = jmsConnection; 
+	public InMemoryAlgoEnvConfigRunner(JMS jmsConnection, IBroker broker) throws Exception {
+		super();
+		this.dataConnection = jmsConnection; 
+		this.broker = broker;		
+		/*JFrame f = new JFrame("SOFT TERMINATE");	
+		JButton b = new JButton("SOFT TERMINATE"); 
+		f.getContentPane().add(b);
+		b.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				System.exit(0);
+			}
+		});
+		f.setSize(400,200);
+		f.setVisible(true);
+		f.toFront();*/
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+		    public void run() {
+		    	if(system!=null)
+		    		system.stop();
+		    }
+		});
+		
 	}
+	
+	
+	protected void finalize() throws Throwable {
+	    try {
+	    	if(system!=null)
+	    		system.stop();
+	    } finally {
+	        super.finalize();
+	    }
+	}
+
+	
+	
 
 	public void init(String algoEnvClassFile) throws Exception {
 
@@ -87,14 +114,6 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 		// instantiate trade system.RunMode
 		initializeStartStops(algoEnvConfig.getStartStopTimes());
 
-		
-		// instantiate the paper broker
-		PaperBroker paperBroker = new PaperBroker(quoteSource);
-		paperBroker.setLogger(pnlLog);
-		IBroker broker = new AccountManagingBrokerProxy(paperBroker,
-				brokerAccount);		
-
-		
 		// set the instruments ... 
 		List<InstrumentSpecification> specs = new ArrayList<InstrumentSpecification>();
 		for (int i = 0; i < algoEnvConfig.getInstruments().size(); i++) {
@@ -102,9 +121,10 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 			specs.add(spec);
 			// wire quote subscription source and jms source. Very dirty, i know. 
 			MessageHandler handler = new MessageHandler((InternalQuoteSubscriptionSource)quoteSubscriptionSource, null, spec);			
-			jmsConnection.subscribeMessageHandler(jmsConnection.getTopicName(spec), handler);
+			dataConnection.subscribeMessageHandler(dataConnection.getTopicName(spec), handler);
 		}
-
+		
+		
 		
 		// instantiate the trade system
 		@SuppressWarnings("unchecked")
@@ -116,13 +136,14 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 		// configure trade system through algo env config
 		AlgoEnvironment algoEnv = new AlgoEnvironment();
 		algoEnv.setBroker(broker);
-		algoEnv.setBrokerAccount(brokerAccount);
+		algoEnv.setBrokerAccount(broker.getBrokerAccount()); // requires an IBroker2 object. 
 		algoEnv.setAlgoEnvConfig(algoEnvConfig);
 		algoEnv.setValueReporter(new VoidValueReporter());
+		algoEnv.setSpecDao(specDao);
+		algoEnv.setInstrumentSpecs(specs);
 		
 		if (!system.initialize(algoEnv, algoEnvConfig.getAlgoConfig()))
 			return;
-
 
 		//
 		log.info("All set, starting data feeds");
@@ -148,31 +169,15 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 		if (isQuoteWithinStartStopTimes(q)) {
 			// ... and then to the system
 			system.onQuote(q);
-			pnlLog.log(q);
 		} else {
 			// force liquidation at market price
 			system.forcedTradingStop();
 		}
 	}
 	
-	@ManagedAttribute(description="Current PNL", currencyTimeLimit=15)
-	public double getCurrentPnl()
-	{
-		if(pnlLog.getPnlValueSeries().size()>0)
-			return pnlLog.getPnlValueSeries().lastElement().getValue();
-		return 0.0;
-	}
 	
-	@ManagedAttribute(description="Current Portfolio as String", currencyTimeLimit=15)
-	public String getPortfolioAsString()
-	{
-		String ret = ""; 
-		
-		Portfolio p = brokerAccount.getPortfolio();
-		for(Position pos : p.getPositions())
-			ret+=pos.toString()+"; ";
-		return ret; 
-	}
+
+	
 	
 	public static void main(String[] args) throws Exception {
 		if(args.length==1)
