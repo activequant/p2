@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<!-- property file -->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:activequantdao/database-activequant.properties"/>
+		<property name="ignoreUnresolvablePlaceholders" value="true"/>
+	</bean>
+	
+	<!-- ### Persistence: Hibernate ### -->
+	<!-- Data source -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${database.driver}" />
+		<property name="url" value="${database.url}" />
+	</bean>
+
+	<!-- Database Property -->
+	<bean id="hibernateProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
+			<props>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.dialect">${database.dialect}</prop>		
+				<prop key="hibernate.query.substitutions">true 'T', false 'F'</prop>
+				<prop key="hibernate.show_sql">${database.showSql}</prop>
+				<prop key="hibernate.c3p0.minPoolSize">5</prop>
+				<prop key="hibernate.c3p0.maxPoolSize">20</prop>
+				<prop key="hibernate.c3p0.timeout">600</prop>
+				<prop key="hibernate.jdbc.batch_size">20</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<!-- Hibernate SessionFactory -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<!-- properties -->
+		<property name="dataSource" ref="dataSource" />
+		<property name="hibernateProperties" ref="hibernateProperties" />
+		
+		<!--  mappings -->
+		<property name="mappingResources">
+			<list>
+				<value>dao/hibernate/domainmodel/store.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/candle.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/quote.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/tradeindication.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/instrumentspecification.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/account.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/balancebook.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/balanceentry.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/brokeraccount.hbm.xml</value> 
+				<value>dao/hibernate/domainmodel/order.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/orderevent.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/orderhistory.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/orderbook.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/portfolio.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/position.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/transaction.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/transactionbook.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/indexcomponent.hbm.xml</value>
+				<value>dao/hibernate/domainmodel/indexcomposition.hbm.xml</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- DAOs -->	
+	<bean id="indexCompositionDao" class="org.activequant.dao.hibernate.IndexCompositionDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="indexComponentDao" class="org.activequant.dao.hibernate.IndexComponentDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>	
+	
+	<bean id="accountDao" class="org.activequant.dao.hibernate.AccountDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="brokerAccountDao" class="org.activequant.dao.hibernate.BrokerAccountDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>	
+	
+	<bean id="orderBookDao" class="org.activequant.dao.hibernate.OrderBookDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="orderDao" class="org.activequant.dao.hibernate.OrderDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="tickDao" class="org.activequant.dao.hibernate.TradeIndicationDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="candleDao" class="org.activequant.dao.hibernate.CandleDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="quoteDao" class="org.activequant.dao.hibernate.QuoteDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="specificationDao" class="org.activequant.dao.hibernate.SpecificationDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="storeDao" class="org.activequant.dao.hibernate.StoreDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+</beans>

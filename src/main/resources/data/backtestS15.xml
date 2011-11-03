@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+
+    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+        <property name="beans">
+            <map>
+                <entry key="bean:name=runner" value-ref="runner"/>
+            </map>
+        </property>
+        <property name="registrationBehaviorName" value="REGISTRATION_REPLACE_EXISTING"/>
+    </bean>
+    
+
+    <bean id="runner" class="org.activequant.backtesting.SingularBacktester">	   
+    </bean>
+
+</beans>
