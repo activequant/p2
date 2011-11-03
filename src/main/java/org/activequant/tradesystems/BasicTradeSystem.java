@@ -16,6 +16,8 @@ import org.activequant.optimization.domainmodel.AlgoConfig;
 import org.activequant.util.pattern.events.Event2;
 import org.activequant.util.pattern.events.IEventListener;
 
+import org.apache.log4j.Logger;
+
 /**
  * 
  * @author Ghost Rider
@@ -27,6 +29,7 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 	private AlgoConfig algoConfig; 
 	private AlgoEnvironment algoEnv; 
 	private final Event2<Order, OrderEvent> orderEvents = new Event2<Order, OrderEvent>();
+        private static Logger log = Logger.getLogger(BasicTradeSystem.class);
 
 	public Event2<Order, OrderEvent> getOrderEvents() {
 		return orderEvents;
@@ -128,9 +131,11 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 		if (algoEnv.getBrokerAccount().getPortfolio().hasPosition(spec)) {
 			currentPosition = algoEnv.getBrokerAccount().getPortfolio().getPosition(spec).getQuantity();
 		}
-
+		log.info("Current position in "+ spec.toString()+": " + currentPosition);
+		log.info("Target position: " + tgtPosition + " at " + limit);
 		if (tgtPosition != currentPosition) {
 			if (tgtPosition > currentPosition) {
+				log.info("Tgt position > currentPosition.");
 				// have to go further long.
 				// check if there is a long order to reach this position active
 				// ...
@@ -144,13 +149,15 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 							// update the order. 
 							h.getOrder().setLimitPrice(limit);
 							orderTrackers.get(h.getOrder()).update(h.getOrder());
-							
+							log.info("Updated limit price of existing order.");	
 						} else {
 							orderTrackers.get(h.getOrder()).cancel();
+							log.info("Cancelled existing order.");
 						}
 					} else {
 						// cancel any sell order.
 						orderTrackers.get(h.getOrder()).cancel();
+						log.info("Cancelled existing order.");
 					}
 
 				}
@@ -158,6 +165,7 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 					if (limit == 0.0)
 						limit = Double.MAX_VALUE;
 					final Order o = longLimitOrder(spec, limit, positionDifference);
+					log.info("Sending long limit order for "+ positionDifference);
 					// // log.info("Long limit order at " + limit);
 					IOrderTracker t = algoEnv.getBroker().prepareOrder(o);
 					t.getOrderEventSource().addEventListener(new IEventListener<OrderEvent>() {
@@ -176,6 +184,7 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 				
 
 			} else if (tgtPosition < currentPosition) {
+                                log.info("Tgt position < currentPosition.");
 
 				// have to go further long.
 				// check if there is a long order to reach this position active
@@ -189,13 +198,17 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 							// update the order. 
 							h.getOrder().setLimitPrice(limit);
 							orderTrackers.get(h.getOrder()).update(h.getOrder());
-							
+							log.info("Updated limit price of existing order.");
 						} else {
 							orderTrackers.get(h.getOrder()).cancel();
+							log.info("Cancelled existing order.");
+
 						}
 					} else {
 						// cancel any buy order.
 						orderTrackers.get(h.getOrder()).cancel();
+						log.info("Cancelled existing order.");
+
 					}
 
 				}
@@ -204,6 +217,7 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 					if (limit == 0.0)
 						limit = Double.MIN_VALUE;
 					final Order o = shortLimitOrder(spec, limit, Math.abs(positionDifference));
+					log.info("Sending short limit order for "+ positionDifference);
 					// log.info("Short limit order at " + limit);
 					IOrderTracker t = algoEnv.getBroker().prepareOrder(o);
 					t.getOrderEventSource().addEventListener(new IEventListener<OrderEvent>() {
@@ -222,7 +236,6 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 			}
 		}
 	}
-
 
 	public HashMap<Order, IOrderTracker> getOrderTrackers() {
 		return orderTrackers;

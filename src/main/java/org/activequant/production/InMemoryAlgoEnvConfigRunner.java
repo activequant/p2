@@ -57,7 +57,7 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public InMemoryAlgoEnvConfigRunner(JMS jmsConnection, IBroker broker) throws Exception {
+	public InMemoryAlgoEnvConfigRunner(JMS jmsConnection, IBroker2 broker) throws Exception {
 		super();
 		this.dataConnection = jmsConnection; 
 		this.broker = broker;		
