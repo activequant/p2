@@ -24,20 +24,6 @@
 			<timezone>+1</timezone>
 		</developer>
 	</developers>
-	<contributors>
-		<contributor>
-			<name>Quentin Bossard</name>
-			<roles>
-				<role>Early beta tester</role>
-			</roles>
-		</contributor>
-		<contributor>
-			<name>Daniel Perez</name>
-			<roles>
-				<role>Early beta tester</role>
-			</roles>
-		</contributor>
-	</contributors>
 	<scm>
 		<connection> scm:svn:svn://activequant.org/opt/repositories/hidden/trunk/p2 
 		</connection>
@@ -103,16 +89,16 @@
 	<build>
 		<pluginManagement>
 			<plugins>
- <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>jboss-maven-plugin</artifactId>
-        <version>1.4.1</version>
-        <configuration>
-          <jbossHome>/opt/jboss-6.0.0.Final</jbossHome>
-          <serverName>all</serverName>
-          <fileName>target/my-project.war</fileName>
-        </configuration>
-      </plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>jboss-maven-plugin</artifactId>
+					<version>1.4.1</version>
+					<configuration>
+						<jbossHome>/opt/jboss-6.0.0.Final</jbossHome>
+						<serverName>all</serverName>
+						<fileName>target/my-project.war</fileName>
+					</configuration>
+				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -190,6 +176,11 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
+		<repository>
+			<id>releases</id>
+			<name>Releases</name>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
+		</repository>
 	</repositories>
 	<distributionManagement>
 		<repository>
@@ -228,37 +219,37 @@
 		<dependency>
 			<groupId>org.activequant</groupId>
 			<artifactId>activequant-framework</artifactId>
-			<version>1.6</version>
+			<version>1.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.activequant</groupId>
 			<artifactId>activequant-filtering</artifactId>
-			<version>1.6</version>
+			<version>1.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.activequant</groupId>
 			<artifactId>activequant-adapter-simple</artifactId>
-			<version>1.6</version>
+			<version>1.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.activequant</groupId>
 			<artifactId>activequant-util-spring</artifactId>
-			<version>1.6</version>
+			<version>1.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.activequant</groupId>
 			<artifactId>activequant-util-charting</artifactId>
-			<version>1.6</version>
+			<version>1.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.activequant</groupId>
 			<artifactId>activequant-regression</artifactId>
-			<version>1.6</version>
+			<version>1.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.activequant</groupId>
 			<artifactId>activequant-dao-hibernate</artifactId>
-			<version>1.6</version>
+			<version>1.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>jexcelapi</groupId>
@@ -268,17 +259,17 @@
 		<dependency>
 			<groupId>org.activequant</groupId>
 			<artifactId>activequant-messaging-jabber</artifactId>
-			<version>1.6</version>
+			<version>1.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.activequant</groupId>
 			<artifactId>activequant-messaging-email</artifactId>
-			<version>1.6</version>
+			<version>1.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.activequant</groupId>
 			<artifactId>activequant-adapter-ib</artifactId>
-			<version>1.6</version>
+			<version>1.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -333,6 +324,11 @@
 			<groupId>com.baulsupp.kolja</groupId>
 			<artifactId>jcurses</artifactId>
 			<version>0.9.5.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.cloudhoist</groupId>
+			<artifactId>zeromq</artifactId>
+			<version>0.5.0</version>
 		</dependency>
 	</dependencies>
 </project>
