@@ -26,8 +26,8 @@ public class S15 extends BasicTradeSystem {
 	private int direction = 0;
 	private DecimalFormat df = new DecimalFormat("##.#####");
 	private int directionCount = 0;
-	//private int factor1 = 100, factor2 = 1000; 
-	private int factor1 = 1, factor2 = 1;
+	private int factor1 = 100, factor2 = 1000; 
+	//private int factor1 = 1, factor2 = 1;
 
 	@Override
 	public boolean initialize(AlgoEnvironment algoEnv, AlgoConfig algoConfig) {
