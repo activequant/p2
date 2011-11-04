@@ -2,9 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<name>P2</name>
-	<description> ActiveQuant P2 is a trading application suite. It
-		consists of several subparts: optimization, backtesting, production
-		trading. </description>
+	<description>ActiveQuant P2 is a trading application suite. It consists of several subparts: optimization, backtesting, production trading.</description>
 	<groupId>org.activequant</groupId>
 	<artifactId>activequant-p2</artifactId>
 	<version>1.3-SNAPSHOT</version>
@@ -45,10 +43,6 @@
 		<system>Redmine</system>
 		<url>http://activequant.org/projects/aqt-examples/issues</url>
 	</issueManagement>
-	<ciManagement>
-		<system>continuum</system>
-		<url>http://activequant.org/continuum</url>
-	</ciManagement>
 	<reporting>
 		<plugins>
 			<plugin>
@@ -252,11 +246,6 @@
 			<version>1.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>jexcelapi</groupId>
-			<artifactId>jxl</artifactId>
-			<version>2.6</version>
-		</dependency>
-		<dependency>
 			<groupId>org.activequant</groupId>
 			<artifactId>activequant-messaging-jabber</artifactId>
 			<version>1.8-SNAPSHOT</version>
@@ -306,11 +295,6 @@
 			<artifactId>postgresql</artifactId> <version>8.3-603.jdbc4</version> <scope>runtime</scope> 
 			</dependency> -->
 		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<version>6.1H.4rc1</version>
-		</dependency>
-		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.6</version>
@@ -331,4 +315,9 @@
 			<version>0.5.0</version>
 		</dependency>
 	</dependencies>
+	<inceptionYear>2009</inceptionYear>
+	<organization>
+		<name>ActiveQuant</name>
+		<url>http://www.activequant.org</url>
+	</organization>
 </project>

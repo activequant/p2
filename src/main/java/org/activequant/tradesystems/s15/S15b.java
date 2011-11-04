@@ -1,10 +1,5 @@
 package org.activequant.tradesystems.s15;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-
 import org.activequant.container.report.SimpleReport;
 import org.activequant.core.domainmodel.InstrumentSpecification;
 import org.activequant.core.domainmodel.data.Quote;
@@ -12,12 +7,9 @@ import org.activequant.optimization.domainmodel.AlgoConfig;
 import org.activequant.production.InMemoryAlgoEnvConfigRunner;
 import org.activequant.tradesystems.AlgoEnvironment;
 import org.activequant.tradesystems.BasicTradeSystem;
-import org.activequant.util.FinancialLibrary2;
 import org.activequant.util.LimitedQueue;
 import org.activequant.util.spring.ServiceLocator;
-import org.activequant.util.tools.ArrayUtils;
-
-import common.Logger;
+import org.apache.log4j.Logger;
 
 public class S15b extends BasicTradeSystem {
 

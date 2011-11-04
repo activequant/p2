@@ -25,7 +25,14 @@ public class SystemState implements Serializable {
 	private LimitedQueue<Double> shortRatioQueue, longRatioQueue;
 	private Double entryPrice1, entryPrice2;
 	private double pnl = 0.0;
+	private double totalPnl = 0.0;
 	
+		public double getTotalPnl() {
+		return totalPnl;
+	}
+	public void setTotalPnl(double totalPnl) {
+		this.totalPnl = totalPnl;
+	}
 		public void incQuoteCount(){
 		quoteCount++;
 	}

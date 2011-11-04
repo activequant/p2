@@ -9,8 +9,7 @@ import org.activequant.optimization.domainmodel.AlgoEnvConfig;
 import org.activequant.optimization.domainmodel.SimulationConfig;
 import org.activequant.optimizations.util.ISimConfigSource;
 import org.activequant.util.tools.ArrayUtils;
-
-import common.Logger;
+import org.apache.log4j.Logger;
 
 public class SimConfigSource implements ISimConfigSource {
 	public List<SimulationConfig> simConfigs() {

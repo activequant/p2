@@ -12,16 +12,16 @@ public class BacktestS15 {
 	 */
 	public static void main(String[] args) throws Exception {
 		SingularBacktester runner = (SingularBacktester) ServiceLocator
-		.instance("data/backtestS15.xml").getContext()
-		.getBean("runner");
+				.instance("data/backtestS15.xml").getContext()
+				.getBean("runner");
 		SimulationConfig sc = new SimulationConfig();
-		sc.setSimulationDays(new Integer[]{20111101,20111102});
+		sc.setSimulationDays(new Integer[] { 20111101, 20111102 });
 		sc.setId(1L);
 		AlgoEnvConfig aec = new AlgoEnvConfigS15();
 		sc.setAlgoEnvConfig(aec);
 
 		runner.simulate(sc);
-		
+
 	}
 
 }

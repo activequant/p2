@@ -124,18 +124,18 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 	public void setTargetPosition(TimeStamp timeStamp, InstrumentSpecification spec, int tgtPosition, double limit) {
 		
 		// send the reporting ..
-		getAlgoEnv().getValueReporter().report(timeStamp, "TGTPOS", new Double(tgtPosition));
+		//getAlgoEnv().getValueReporter().report(timeStamp, "TGTPOS", new Double(tgtPosition));
 		
 		// 
 		double currentPosition = 0.0;
 		if (algoEnv.getBrokerAccount().getPortfolio().hasPosition(spec)) {
 			currentPosition = algoEnv.getBrokerAccount().getPortfolio().getPosition(spec).getQuantity();
 		}
-		log.info("Current position in "+ spec.toString()+": " + currentPosition);
-		log.info("Target position: " + tgtPosition + " at " + limit);
+		log.debug("Current position in "+ spec.toString()+": " + currentPosition);
+		log.debug("Target position: " + tgtPosition + " at " + limit);
 		if (tgtPosition != currentPosition) {
 			if (tgtPosition > currentPosition) {
-				log.info("Tgt position > currentPosition.");
+				log.debug("Tgt position > currentPosition.");
 				// have to go further long.
 				// check if there is a long order to reach this position active
 				// ...
@@ -149,15 +149,15 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 							// update the order. 
 							h.getOrder().setLimitPrice(limit);
 							orderTrackers.get(h.getOrder()).update(h.getOrder());
-							log.info("Updated limit price of existing order.");	
+							log.debug("Updated limit price of existing order.");	
 						} else {
 							orderTrackers.get(h.getOrder()).cancel();
-							log.info("Cancelled existing order.");
+							log.debug("Cancelled existing order.");
 						}
 					} else {
 						// cancel any sell order.
 						orderTrackers.get(h.getOrder()).cancel();
-						log.info("Cancelled existing order.");
+						log.debug("Cancelled existing order.");
 					}
 
 				}
@@ -165,8 +165,8 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 					if (limit == 0.0)
 						limit = Double.MAX_VALUE;
 					final Order o = longLimitOrder(spec, limit, positionDifference);
-					log.info("Sending long limit order for "+ positionDifference);
-					// // log.info("Long limit order at " + limit);
+					log.debug("Sending long limit order for "+ positionDifference);
+					// // log.debug("Long limit order at " + limit);
 					IOrderTracker t = algoEnv.getBroker().prepareOrder(o);
 					t.getOrderEventSource().addEventListener(new IEventListener<OrderEvent>() {
 						@Override
@@ -184,7 +184,7 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 				
 
 			} else if (tgtPosition < currentPosition) {
-                                log.info("Tgt position < currentPosition.");
+                                log.debug("Tgt position < currentPosition.");
 
 				// have to go further long.
 				// check if there is a long order to reach this position active
@@ -198,16 +198,16 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 							// update the order. 
 							h.getOrder().setLimitPrice(limit);
 							orderTrackers.get(h.getOrder()).update(h.getOrder());
-							log.info("Updated limit price of existing order.");
+							log.debug("Updated limit price of existing order.");
 						} else {
 							orderTrackers.get(h.getOrder()).cancel();
-							log.info("Cancelled existing order.");
+							log.debug("Cancelled existing order.");
 
 						}
 					} else {
 						// cancel any buy order.
 						orderTrackers.get(h.getOrder()).cancel();
-						log.info("Cancelled existing order.");
+						log.debug("Cancelled existing order.");
 
 					}
 
@@ -217,8 +217,8 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 					if (limit == 0.0)
 						limit = Double.MIN_VALUE;
 					final Order o = shortLimitOrder(spec, limit, Math.abs(positionDifference));
-					log.info("Sending short limit order for "+ positionDifference);
-					// log.info("Short limit order at " + limit);
+					log.debug("Sending short limit order for "+ positionDifference);
+					// log.debug("Short limit order at " + limit);
 					IOrderTracker t = algoEnv.getBroker().prepareOrder(o);
 					t.getOrderEventSource().addEventListener(new IEventListener<OrderEvent>() {
 						@Override
@@ -235,7 +235,7 @@ public class BasicTradeSystem implements IBatchTradeSystem {
 				}
 			}
 			else {
-				log.info("Target position reached. ");
+				log.debug("Target position reached. ");
 			}
 		}
 	}

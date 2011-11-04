@@ -9,6 +9,7 @@ import java.util.List;
 import org.activequant.core.domainmodel.InstrumentSpecification;
 import org.activequant.core.domainmodel.data.Quote;
 import org.activequant.core.types.TimeFrame;
+import org.activequant.core.types.TimeStamp;
 import org.activequant.data.retrieval.IQuoteSubscriptionSource;
 import org.activequant.data.retrieval.ISubscription;
 import org.activequant.util.exceptions.SubscriptionException;
@@ -23,6 +24,7 @@ public class VirtualQuoteSubscriptionSource implements IQuoteSubscriptionSource 
 	private HashMap<InstrumentSpecification, List<ISubscription<Quote>>> sububscriptions = new HashMap<InstrumentSpecification, List<ISubscription<Quote>>>();
 	private HashMap<InstrumentSpecification, Quote> theQuoteSheet = new HashMap<InstrumentSpecification, Quote>();
 	private UniqueDateGenerator dateGenerator = new UniqueDateGenerator(); 
+	private TimeStamp theCurrentTime; 
 	
 	/**
 	 * 
@@ -39,7 +41,7 @@ public class VirtualQuoteSubscriptionSource implements IQuoteSubscriptionSource 
 				Quote myCurrentQuote = theQuoteSheet.get(theSpec);
 				// rewrite the current quote time ..
 				myCurrentQuote.setTimeStamp(
-						dateGenerator.generate(myCurrentQuote.getTimeStamp().getDate()));
+						dateGenerator.generate(theCurrentTime.getDate()));
 				synchronized (listeners) {
 					for (IEventListener<Quote> myListener : listeners)
 						myListener.eventFired(myCurrentQuote);
@@ -102,7 +104,7 @@ public class VirtualQuoteSubscriptionSource implements IQuoteSubscriptionSource 
 	public void distributeQuote(Quote aQuote) {
 		// update the local quote sheet
 		theQuoteSheet.put(aQuote.getInstrumentSpecification(), aQuote);
-
+		theCurrentTime = aQuote.getTimeStamp();
 			List<ISubscription<Quote>> subs = (List<ISubscription<Quote>>) sububscriptions
 					.get(aQuote.getInstrumentSpecification());
 			if (subs == null)

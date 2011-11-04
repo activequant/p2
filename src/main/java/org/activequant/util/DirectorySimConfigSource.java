@@ -8,8 +8,7 @@ import org.activequant.optimization.domainmodel.AlgoConfig;
 import org.activequant.optimization.domainmodel.AlgoEnvConfig;
 import org.activequant.optimization.domainmodel.SimulationConfig;
 import org.activequant.util.tools.ArrayUtils;
-
-import common.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * TODO: WIP

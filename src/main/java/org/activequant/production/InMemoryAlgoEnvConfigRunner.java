@@ -4,13 +4,10 @@ package org.activequant.production;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.activequant.broker.AccountManagingBrokerProxy;
-import org.activequant.broker.IBroker2;
+
 import org.activequant.core.domainmodel.InstrumentSpecification;
-import org.activequant.core.domainmodel.account.BrokerAccount;
-import org.activequant.core.domainmodel.account.Portfolio;
-import org.activequant.core.domainmodel.account.Position;
 import org.activequant.core.domainmodel.data.Quote;
+import org.activequant.broker.IBroker2; 
 import org.activequant.dao.IFactoryDao;
 import org.activequant.dao.ISpecificationDao;
 import org.activequant.dao.hibernate.FactoryLocatorDao;
@@ -28,7 +25,6 @@ import org.activequant.util.tempjms.InternalQuoteSubscriptionSource;
 import org.activequant.util.tempjms.JMS;
 import org.activequant.util.tempjms.MessageHandler;
 import org.apache.log4j.Logger;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
 
 /**
  * Runner that runs with an in memory algo env config. 

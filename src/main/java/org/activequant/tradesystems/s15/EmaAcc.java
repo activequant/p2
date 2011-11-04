@@ -25,8 +25,8 @@ public class EmaAcc  implements Serializable {
 		return period;
 	}
 
-	private int period = 50;
-	private double exponent = 2 / (double) (period + 1);
+	private int period;
+	private double exponent;
 	public double eacc2(double val){
 		accValues++; 
 		if(accValues <= period){
@@ -40,7 +40,8 @@ public class EmaAcc  implements Serializable {
 	
 	public EmaAcc(int period)
 	{
-		this.period = period; 
+		this.period = period;
+		this.exponent =  2 / (double) (period + 1); 
 	}
 	
 	/**

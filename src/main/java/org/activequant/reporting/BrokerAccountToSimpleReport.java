@@ -48,7 +48,7 @@ public class BrokerAccountToSimpleReport {
 	
 	private void populatePnlRelatedStatistics(SimpleReport r, ValueSeries v)
 	{
-		if(!v.isEmpty())
+		if(v!=null && !v.isEmpty())
 			r.getReportValues().put("PNL", v.lastElement().getValue());
 		else
 			r.getReportValues().put("PNL", 0.0);	

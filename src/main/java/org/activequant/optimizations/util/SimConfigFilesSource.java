@@ -6,8 +6,7 @@ import java.util.List;
 
 import org.activequant.optimization.domainmodel.SimulationConfig;
 import org.activequant.util.SimpleSerializer;
-
-import common.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * Loads all sim configs from a folder and returns these as a list.
