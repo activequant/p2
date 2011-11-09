@@ -61,6 +61,7 @@ class TRTHImporter {
 				q.setAskQuantity(askSize);
 				q.setInstrumentSpecification(spec);
 				quoteDao.update(q);
+				System.out.print("Q");
 			}
 			else if(type.equals("Trade")){
 				Double tradePrice = Double.parseDouble(lineParts[5]);
@@ -70,6 +71,7 @@ class TRTHImporter {
 				ti.setQuantity(tradeVol);
 				ti.setTimeStamp(new TimeStamp(dt));
 				tradeDao.update(ti);
+				System.out.print("T");
 			}
 			
 			
