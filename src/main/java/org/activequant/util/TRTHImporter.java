@@ -24,7 +24,7 @@ class TRTHImporter {
 	IQuoteDao quoteDao = factoryDao.createQuoteDao();
 	ITradeIndicationDao tradeDao = factoryDao.createTradeIndicationDao();
 	protected final static Logger log = Logger.getLogger(TRTHImporter.class);
-	private SimpleDateFormat df = new SimpleDateFormat( "dd-MMM-yyyy HH:mm:ss.S" );
+	private SimpleDateFormat df = new SimpleDateFormat( "dd-MMM-yyyy HH:mm:ss.S z" );
 
 	public TRTHImporter(String fileName, Integer instrumentId) throws Exception {
 		InstrumentSpecification spec = specDao.find(instrumentId);
@@ -36,7 +36,7 @@ class TRTHImporter {
 		Date dt; 
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
 		String l = br.readLine();
-			
+		long formerNanoSeconds = 0L;	
 		while(l!=null){
 //			System.out.println(l);
 			if(l.startsWith("#")){
@@ -46,10 +46,16 @@ class TRTHImporter {
 			String[] lineParts = l.split(",");
 			String date = lineParts[1];
 			String time = lineParts[2];
+			time = time.substring(0, 12);
 			String timeZone = lineParts[3];
-			df.setTimeZone(TimeZone.getTimeZone("GMT "+timeZone+":00"));
-			String compoundDateTime = date + " "+time;
+			
+			String compoundDateTime = date + " "+time +" GMT"+timeZone+":00";
 			dt = df.parse(compoundDateTime);
+			long nanoSeconds = dt.getTime() * 1000000;
+			while(nanoSeconds <= formerNanoSeconds)
+				nanoSeconds++;
+			formerNanoSeconds = nanoSeconds; 
+			
 			
 			String type = lineParts[4];
 			
@@ -59,7 +65,7 @@ class TRTHImporter {
 				Double askPrice = Double.parseDouble(lineParts[10]);
 				Double askSize = Double.parseDouble(lineParts[11]);
 				Quote q = new Quote();
-				q.setTimeStamp(new TimeStamp(dt));
+				q.setTimeStamp(new TimeStamp(nanoSeconds));
 				q.setBidPrice(bidPrice);
 				q.setAskPrice(askPrice);
 				q.setBidQuantity(bidSize);
@@ -74,7 +80,7 @@ class TRTHImporter {
 				TradeIndication ti = new TradeIndication(spec);
 				ti.setPrice(tradePrice);
 				ti.setQuantity(tradeVol);
-				ti.setTimeStamp(new TimeStamp(dt));
+				ti.setTimeStamp(new TimeStamp(nanoSeconds));
 				tradeDao.update(ti);
 				System.out.print("T");
 			}
