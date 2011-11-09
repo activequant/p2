@@ -22,10 +22,19 @@ public class PnlLogger3 extends LoggerBase {
 
 	private int quoteCount = 0;
 	private double pnl = 0.0;
+	public double getPnl() {
+		return pnl;
+	}
+
+	public void setPnl(double pnl) {
+		this.pnl = pnl;
+	}
+
 	private ValueSeries pnlValueSeries = new ValueSeries();
 	private HashMap<InstrumentSpecification, ValueSeries> instrumentPnlValueSeries = new HashMap<InstrumentSpecification, ValueSeries>();
 	private HashMap<InstrumentSpecification, ValueSeries> positionValueSeries = new HashMap<InstrumentSpecification, ValueSeries>();
 	private IValueReporter valueReporter; 
+	
 
 	/**
 	 * PNL Logger constructor that can take a value reporter where to report the values over.  
@@ -34,7 +43,12 @@ public class PnlLogger3 extends LoggerBase {
 	public PnlLogger3(IValueReporter valueReporter) {
 		this.valueReporter = valueReporter; 
 	}
+	
+	public PnlLogger3() { 
+	}
 
+	
+	
 	/**
 	 * the getter for the pnl value series.
 	 * 
@@ -86,7 +100,8 @@ public class PnlLogger3 extends LoggerBase {
 			thePositions.put(iid, newPosition);
 			addPositionValue(order.getInstrumentSpecification(), event.getEventTimeStamp(), newPosition);
 			theInstrumentValuationPrices.put(iid, executionEvent.getPrice());
-			valueReporter.report(event.getEventTimeStamp(), "POSITION",newPosition);
+			if(valueReporter!=null)
+				valueReporter.report(event.getEventTimeStamp(), "POSITION",newPosition);
 		}				
 	}
 
@@ -103,7 +118,8 @@ public class PnlLogger3 extends LoggerBase {
 
 		// update the position count.
 		double currentPosition = thePositions.get(iid);
-		valueReporter.report(quote.getTimeStamp(), "POSITION",currentPosition);
+		if(valueReporter!=null)
+			valueReporter.report(quote.getTimeStamp(), "POSITION",currentPosition);
 		if (currentPosition != 0.0) {
 			double myLastPrice = theInstrumentValuationPrices.get(iid);
 			double myRelevantQuotePrice = currentPosition > 0 ? quote.getBidPrice() : quote.getAskPrice();
@@ -138,7 +154,8 @@ public class PnlLogger3 extends LoggerBase {
 		if (refVal == null || refVal.getValue() != val)
 			pnlValueSeries.add(myValue);
 		
-		valueReporter.report(ts, "PNL", val);
+		if(valueReporter!=null)
+			valueReporter.report(ts, "PNL", val);
 	}
 
 

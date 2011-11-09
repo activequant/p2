@@ -20,7 +20,7 @@ public class AlgoEnvBase {
 
 	protected List<Tuple<Long, Long>> convertedStartStopTimes;
 	protected SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-
+	
 	protected AlgoEnvBase() {
 		super();
 	}
@@ -65,7 +65,7 @@ public class AlgoEnvBase {
 	 * @return
 	 * @throws Exception
 	 */
-	protected TimeStamp createTimeStamp(Integer dateStamp) throws Exception {
+	protected TimeStamp createStartTimeStamp(Integer dateStamp) throws Exception {
 		TimeStamp ts; 
 		if(dateStamp<0)
 		{
@@ -77,6 +77,30 @@ public class AlgoEnvBase {
 		else
 		{
 			ts = new TimeStamp(sdf.parse(dateStamp.toString()));
+		}
+		return ts; 
+	}
+	
+	/**
+	 * Creates a lower-than timestamp.  
+	 * @param dateStamp
+	 * @return
+	 * @throws Exception
+	 */
+	protected TimeStamp createEndTimeStamp(Integer dateStamp) throws Exception {
+		TimeStamp ts; 
+		if(dateStamp<0)
+		{
+			// relative time frame in days given. 
+			Calendar cal = GregorianCalendar.getInstance();
+			cal.add(Calendar.DAY_OF_MONTH, dateStamp);	
+			cal.add(Calendar.DATE, 1);
+			ts = new TimeStamp(cal.getTimeInMillis() * 1000000);
+		}
+		else
+		{
+			ts = new TimeStamp(sdf.parse(dateStamp.toString()).getTime() * 1000000L + 24L * 60L * 60L * 1000L * 1000000L);
+			
 		}
 		return ts; 
 	}

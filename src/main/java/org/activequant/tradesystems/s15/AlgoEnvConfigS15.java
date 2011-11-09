@@ -29,8 +29,10 @@ public class AlgoEnvConfigS15 extends AlgoEnvConfig {
 		// create algo config and set it. 
 		AlgoConfig ac = new AlgoConfig();
 		ac.setAlgorithm("org.activequant.tradesystems.s15.S15");
-		ac.put("period1", 2);
-		ac.put("period2", 100);
+		ac.put("period1", 3);
+		ac.put("period2", 10);
+		
+		
 		
 		setAlgoConfig(ac);
 	}

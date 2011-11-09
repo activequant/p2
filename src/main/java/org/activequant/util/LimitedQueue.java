@@ -2,6 +2,12 @@ package org.activequant.util;
 
 import java.util.LinkedList;
 
+/**
+ * Plain Queue implementation with a limited size. 
+ * @author Ulrich Staudinger
+ *
+ * @param <E>
+ */
 public class LimitedQueue<E> extends LinkedList<E> {
 
     /**

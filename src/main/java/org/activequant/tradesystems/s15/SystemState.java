@@ -102,16 +102,28 @@ public class SystemState implements Serializable {
 	public void setSmoothedRatio(Double ratioDiff) {
 		this.smoothedRatio = ratioDiff;
 	}
-	public LimitedQueue<Double> getShortRatioQueue() {
+	public LimitedQueue<Double> getFastRatioEmaQueue() {
 		return shortRatioQueue;
 	}
+	/**
+	 * @deprecated Use {@link #setFastRatioEmaQueue(LimitedQueue<Double>)} instead
+	 */
 	public void setShortRatioQueue(LimitedQueue<Double> shortRatioQueue) {
+		setFastRatioEmaQueue(shortRatioQueue);
+	}
+	public void setFastRatioEmaQueue(LimitedQueue<Double> shortRatioQueue) {
 		this.shortRatioQueue = shortRatioQueue;
 	}
-	public LimitedQueue<Double> getLongRatioQueue() {
+	public LimitedQueue<Double> getSlowRatioEmaQueue() {
 		return longRatioQueue;
 	}
+	/**
+	 * @deprecated Use {@link #setSlowRatioEmaQueue(LimitedQueue<Double>)} instead
+	 */
 	public void setLongRatioQueue(LimitedQueue<Double> longRatioQueue) {
+		setSlowRatioEmaQueue(longRatioQueue);
+	}
+	public void setSlowRatioEmaQueue(LimitedQueue<Double> longRatioQueue) {
 		this.longRatioQueue = longRatioQueue;
 	}
 	public Double getEntryPrice1() {

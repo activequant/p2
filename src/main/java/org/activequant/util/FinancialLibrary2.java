@@ -109,6 +109,7 @@ public class FinancialLibrary2 {
 		return value;
 	}
 
+	
 	public static double deviation(int n, double[] vals, int skipdays) {
 		double centerband = SMA(n, vals, skipdays);
 
@@ -116,6 +117,31 @@ public class FinancialLibrary2 {
 
 		for (int i = 0; i < n; i++) {
 			t1 += ((vals[i + skipdays] - centerband) * (vals[i + skipdays] - centerband));
+		}
+
+		double t2 = Math.sqrt(t1 / (double) n);
+
+		return t2;
+	}
+
+	
+	public static double mean(Double[] vals){
+		int n = vals.length;
+		double t1 = 0.0; 
+		for (int i = 0; i < n; i++) {
+			t1 += vals[i];
+		}
+		double mean = t1 / (double)n; 
+		return mean; 
+	}
+	
+	public static double deviation(Double[] vals) {
+		int n = vals.length;
+		double t1 = 0.0;
+		double mean = mean(vals);
+
+		for (int i = 0; i < n; i++) {
+			t1 += ((vals[i] - mean) * (vals[i] - mean));
 		}
 
 		double t2 = Math.sqrt(t1 / (double) n);

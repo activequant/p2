@@ -31,6 +31,7 @@ import org.activequant.statprocessors.valueseries.PnlChartGenerator;
 import org.activequant.tradesystems.AlgoEnvironment;
 import org.activequant.tradesystems.IBatchTradeSystem;
 import org.activequant.util.AlgoEnvBase;
+import org.activequant.util.DateUtils;
 import org.activequant.util.SimpleReportInitializer;
 import org.activequant.util.VirtualQuoteSubscriptionSource;
 import org.activequant.util.tools.ArrayUtils;
@@ -141,7 +142,6 @@ public class SingularBacktester extends AlgoEnvBase {
 				return o1.getTimeStamp().compareTo(o2.getTimeStamp());
 			}});		
 		
-
 		class QuoteIterator implements Iterator {
 			List<ArrayIterator> quoteIterators = new ArrayList<ArrayIterator>();
 			Quote[] quotes = null; 
@@ -185,52 +185,61 @@ public class SingularBacktester extends AlgoEnvBase {
 			}			
 		}
 		
-		QuoteIterator qi = new QuoteIterator(); 
-		
-		for(int i=0;i<specs.size();i++)
-		{	
-			// 						
-			SeriesSpecification sspec = new SeriesSpecification(specs.get(i), TimeFrame.TIMEFRAME_1_TICK);
-			sspec.setStartTimeStamp(createTimeStamp(simConfig.getSimulationDays().get(0)));
-			sspec.setEndTimeStamp(createTimeStamp(simConfig.getSimulationDays().get(simConfig.getSimulationDays().size()-1)));
-			log.info("Loading quotes...");
-			Quote[] quotes = qss.findBySeriesSpecification(sspec);
-			ArrayUtils.reverse(quotes);
-			log.info("Loaded "+ quotes.length+" quotes.");
-			// quoteIterator.addIterator(new ArrayIterator(quotes));
-			ArrayIterator iter = new ArrayIterator(quotes);
-			qi.quoteIterators.add(iter);
-			
-		}	
-		
-				
-		
+
 		//
 		log.info("Starting quote feeding ... ");
 		
 		// replay.
 		TimeMeasurement.start("replay");
-		long nq = 0L; 		
-		while(qi.hasNext())
-		{
-			Quote q = (Quote)qi.next();
-			// time frame check. (has to be moved to environment bracket around system)			
-			// distribute quote to subscribers ... (i.e. paperbroker) 
-			quoteSource.distributeQuote(q);
-			if(!quoteIsSane(q))
-				continue;
-			if(isQuoteWithinStartStopTimes(q))
-			{
-				// ... and then to the system
-				system.onQuote(q);				
-			}
-			else {
-				// force liquidation at market price 
-				system.forcedTradingStop();
+		
+		long nq = 0L;
 				
+		for(Integer simulationDay : simConfig.getSimulationDays())
+		{
+			log.info("Replaying " + simulationDay);
+			QuoteIterator qi = new QuoteIterator(); 		
+			for(int i=0;i<specs.size();i++)
+			{	
+				// 						
+				SeriesSpecification sspec = new SeriesSpecification(specs.get(i), TimeFrame.TIMEFRAME_1_TICK);
+				sspec.setStartTimeStamp(createStartTimeStamp(simulationDay));
+				sspec.setEndTimeStamp(createEndTimeStamp(simulationDay));
+				log.info("Loading quotes ...");
+				Quote[] quotes = qss.findBySeriesSpecification(sspec);
+				ArrayUtils.reverse(quotes);
+				log.info("Loaded "+ quotes.length+" quotes for " + specs.get(i));
+				// quoteIterator.addIterator(new ArrayIterator(quotes));
+				ArrayIterator iter = new ArrayIterator(quotes);
+				qi.quoteIterators.add(iter);				
+			}	
+			// backtest this data set. 
+		
+			 		
+			while(qi.hasNext())
+			{
+				Quote q = (Quote)qi.next();
+				// time frame check. (has to be moved to environment bracket around system)			
+				// distribute quote to subscribers ... (i.e. paperbroker) 
+				quoteSource.distributeQuote(q);
+				if(!quoteIsSane(q))
+					continue;
+				if(isQuoteWithinStartStopTimes(q))
+				{
+					// ... and then to the system
+					system.onQuote(q);				
+				}
+				else {
+					// force liquidation at market price 
+					system.forcedTradingStop();
+					
+				}
+				nq++;
 			}
-			nq++;
+			
 		}
+				
+		
+		
 		// force liquidation (if possible)
 		system.forcedTradingStop();
 		

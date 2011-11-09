@@ -57,17 +57,6 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 		super();
 		this.dataConnection = jmsConnection; 
 		this.broker = broker;		
-		/*JFrame f = new JFrame("SOFT TERMINATE");	
-		JButton b = new JButton("SOFT TERMINATE"); 
-		f.getContentPane().add(b);
-		b.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				System.exit(0);
-			}
-		});
-		f.setSize(400,200);
-		f.setVisible(true);
-		f.toFront();*/
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 		    public void run() {
 		    	if(system!=null)
@@ -86,9 +75,6 @@ public class InMemoryAlgoEnvConfigRunner extends AlgoEnvBase implements
 	        super.finalize();
 	    }
 	}
-
-	
-	
 
 	public void init(String algoEnvClassFile) throws Exception {
 

@@ -24,9 +24,9 @@ public class S15b extends BasicTradeSystem {
 		loadState();		
 		ss.setPeriod1((Integer) algoConfig.get("period1"));
 		ss.setPeriod2((Integer) algoConfig.get("period2"));
-		if(ss.getShortRatioQueue()==null){
-			ss.setShortRatioQueue(new LimitedQueue<Double>(ss.getPeriod1()));
-			ss.setLongRatioQueue(new LimitedQueue<Double>(ss.getPeriod2()));
+		if(ss.getFastRatioEmaQueue()==null){
+			ss.setFastRatioEmaQueue(new LimitedQueue<Double>(ss.getPeriod1()));
+			ss.setSlowRatioEmaQueue(new LimitedQueue<Double>(ss.getPeriod2()));
 		}
 		spec1 = getAlgoEnv().getInstrumentSpecs().get(0); 
 		spec2 = getAlgoEnv().getInstrumentSpecs().get(1);

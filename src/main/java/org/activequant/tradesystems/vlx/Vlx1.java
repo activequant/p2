@@ -44,30 +44,22 @@ public class Vlx1 extends BasicTradeSystem {
 
 	@Override
 	public void onQuote(Quote quote) {
-
+		pnlLogger.log(quote);
 		double currentPosition = 0.000;
-		if (getAlgoEnv().getBrokerAccount().getPortfolio().hasPosition(
-				quote.getInstrumentSpecification())) {
-			currentPosition = getAlgoEnv().getBrokerAccount().getPortfolio()
-					.getPosition(quote.getInstrumentSpecification())
-					.getQuantity();
+		if (getAlgoEnv().getBrokerAccount().getPortfolio().hasPosition(quote.getInstrumentSpecification())) {
+			currentPosition = getAlgoEnv().getBrokerAccount().getPortfolio().getPosition(quote.getInstrumentSpecification()).getQuantity();
 		}
-
-	
 
 		if (formerQuote != null) {
-			if ((quote.getBidPrice() == formerQuote.getBidPrice() && quote
-					.getAskPrice() == formerQuote.getAskPrice())
-					|| (quote.getBidPrice() == Quote.NOT_SET || quote
-							.getAskPrice() == Quote.NOT_SET))
+			if ((quote.getBidPrice() == formerQuote.getBidPrice() && quote.getAskPrice() == formerQuote.getAskPrice())
+					|| (quote.getBidPrice() == Quote.NOT_SET || quote.getAskPrice() == Quote.NOT_SET))
 				return;
 		}
-		formerQuote = quote; 
-	
+		formerQuote = quote;
+
 		quoteUpdateCount++;
 		// only 100% sane quotes ...
-		if (quote.getBidPrice() == Quote.NOT_SET
-				|| quote.getAskPrice() == Quote.NOT_SET)
+		if (quote.getBidPrice() == Quote.NOT_SET || quote.getAskPrice() == Quote.NOT_SET)
 			return;
 
 		if (quoteUpdateCount == 5) {
@@ -116,8 +108,7 @@ public class Vlx1 extends BasicTradeSystem {
 		if (opens.size() < (periods + 100))
 			return;
 
-		double vlx = FinancialLibrary2.volatilityIndex(factor, periods,
-				opensArray, highsArray, lowsArray, closesArray, 0);
+		double vlx = FinancialLibrary2.volatilityIndex(factor, periods, opensArray, highsArray, lowsArray, closesArray, 0);
 		double diffToBid = vlx - quote.getBidPrice();
 		double diffToAsk = vlx - quote.getAskPrice();
 
@@ -130,33 +121,15 @@ public class Vlx1 extends BasicTradeSystem {
 		if (vlxList.size() > periods)
 			vlxList.remove(0);
 
-		getAlgoEnv().getValueReporter().report(quote.getTimeStamp(), "ASK",
-				quote.getAskPrice());
-		getAlgoEnv().getValueReporter().report(quote.getTimeStamp(), "BID",
-				quote.getBidPrice());
-		getAlgoEnv().getValueReporter()
-				.report(quote.getTimeStamp(), "VLX", vlx);
-
 		if (quoteUpdateCount == 0) {
 			// no threshold yet.
 			if (mp > vlx && !longStopped) {
-				setTargetPosition(quote.getTimeStamp(), quote
-						.getInstrumentSpecification(), -1,
-						quote.getBidPrice() + 1);
-			} else if (mp > vlx && longStopped) {
-				setTargetPosition(quote.getTimeStamp(), quote
-						.getInstrumentSpecification(), 0,
-						quote.getBidPrice() + 1);
+				setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), -1, quote.getBidPrice());
 			} else if (mp < vlx && !shortStopped) {
-				setTargetPosition(quote.getTimeStamp(), quote
-						.getInstrumentSpecification(), 1,
-						quote.getAskPrice() - 1);
-			} else if (mp < vlx && shortStopped) {
-				setTargetPosition(quote.getTimeStamp(), quote
-						.getInstrumentSpecification(), 0,
-						quote.getAskPrice() - 1);
-			}
+				setTargetPosition(quote.getTimeStamp(), quote.getInstrumentSpecification(), 1, quote.getAskPrice() );
+			} 
 		}
+		System.out.println(pnlLogger.getPnl());
 	}
 
 	public void populateReport(SimpleReport report) {
@@ -168,8 +141,7 @@ public class Vlx1 extends BasicTradeSystem {
 		// // log.info("Forced liquidation");
 		quoteList.clear();
 		if (formerQuote != null)
-			setTargetPosition(formerQuote.getTimeStamp(), formerQuote
-					.getInstrumentSpecification(), 0, 0.0);
+			setTargetPosition(formerQuote.getTimeStamp(), formerQuote.getInstrumentSpecification(), 0, 0.0);
 		formerQuote = null;
 
 		lows.clear();
