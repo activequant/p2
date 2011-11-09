@@ -32,12 +32,17 @@ class TRTHImporter {
 			System.out.println("Spec is null.");
 			System.exit(0);
 		}
+		System.out.println("SPEC loaded. ");
 		Date dt; 
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
 		String l = br.readLine();
-		
+			
 		while(l!=null){
-			if(l.startsWith("#"))continue;
+			System.out.println(l);
+			if(l.startsWith("#")){
+				l = br.readLine();
+				continue;
+			}
 			String[] lineParts = l.split(",");
 			String date = lineParts[1];
 			String time = lineParts[2];
