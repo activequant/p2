@@ -38,7 +38,7 @@ class TRTHImporter {
 		String l = br.readLine();
 			
 		while(l!=null){
-			System.out.println(l);
+//			System.out.println(l);
 			if(l.startsWith("#")){
 				l = br.readLine();
 				continue;
