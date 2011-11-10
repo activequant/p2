@@ -3,8 +3,9 @@ package org.activequant.util;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.TimeZone;
+import java.util.List;
 
 import org.activequant.core.domainmodel.InstrumentSpecification;
 import org.activequant.core.domainmodel.data.Quote;
@@ -36,7 +37,9 @@ class TRTHImporter {
 		Date dt; 
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
 		String l = br.readLine();
-		long formerNanoSeconds = 0L;	
+		long formerNanoSeconds = 0L;
+		List<Quote> quotes = new ArrayList<Quote>();
+		List<TradeIndication> ticks = new ArrayList<TradeIndication>();
 		while(l!=null){
 //			System.out.println(l);
 			if(l.startsWith("#")){
@@ -71,8 +74,14 @@ class TRTHImporter {
 				q.setBidQuantity(bidSize);
 				q.setAskQuantity(askSize);
 				q.setInstrumentSpecification(spec);
-				quoteDao.update(q);
-				System.out.print("Q");
+				quotes.add(q);
+				if(quotes.size()==1000){
+					quoteDao.update(quotes);
+					quotes.clear();
+					System.out.print("Q");
+				}
+				//quoteDao.update(q);
+				
 			}
 			else if(type.equals("Trade")){
 				Double tradePrice = Double.parseDouble(lineParts[5]);
@@ -81,8 +90,13 @@ class TRTHImporter {
 				ti.setPrice(tradePrice);
 				ti.setQuantity(tradeVol);
 				ti.setTimeStamp(new TimeStamp(nanoSeconds));
-				tradeDao.update(ti);
-				System.out.print("T");
+				ticks.add(ti);
+				if(ticks.size()==1000)
+				{
+					tradeDao.update(ticks);
+					ticks.clear();
+					System.out.print("T");
+				}
 			}
 			
 			
@@ -90,6 +104,8 @@ class TRTHImporter {
 			
 			l = br.readLine();
 		}
+		quoteDao.update(quotes);
+		tradeDao.update(ticks);
 	}
 
 	
