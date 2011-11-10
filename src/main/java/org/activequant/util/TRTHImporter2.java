@@ -40,13 +40,17 @@ class TRTHImporter2 {
 		long formerNanoSeconds = 0L;
 		List<Quote> quotes = new ArrayList<Quote>();
 		List<TradeIndication> ticks = new ArrayList<TradeIndication>();
+		
+		
+		Double bidPrice=null, askPrice=null, bidSize=null, askSize=null;  
+		
 		while(l!=null){
 //			System.out.println(l);
 			if(l.startsWith("#")){
 				l = br.readLine();
 				continue;
 			}
-			String[] lineParts = l.split(",");
+			String[] lineParts = l.split(",",100);
 			String date = lineParts[1];
 			String time = lineParts[2];
 			time = time.substring(0, 12);
@@ -60,30 +64,45 @@ class TRTHImporter2 {
 			formerNanoSeconds = nanoSeconds; 
 			
 			
-			String type = lineParts[4];
+			// 
+			String qualifiers = lineParts[18];
 			
-			if(type.equals("Quote")){
-				Double bidPrice = Double.parseDouble(lineParts[8]);
-				Double bidSize = Double.parseDouble(lineParts[9]);
-				Double askPrice = Double.parseDouble(lineParts[10]);
-				Double askSize = Double.parseDouble(lineParts[11]);
+			
+			String type = lineParts[4];
+			if(type.equals("Quote") && qualifiers.startsWith("BBO")){
+				
+				String bp = lineParts[11];
+				String bs = lineParts[12];
+				String ap = lineParts[15];
+				String as = lineParts[16];
+						
+				if(bp.length()>0)
+					bidPrice = Double.parseDouble(bp);
+				if(bs.length()>0)
+					bidSize = Double.parseDouble(bs);
+				if(ap.length()>0)
+					askPrice = Double.parseDouble(ap);
+				if(as.length()>0)
+					askSize = Double.parseDouble(as);
 				Quote q = new Quote();
 				q.setTimeStamp(new TimeStamp(nanoSeconds));
-				q.setBidPrice(bidPrice);
-				q.setAskPrice(askPrice);
-				q.setBidQuantity(bidSize);
-				q.setAskQuantity(askSize);
+				if(bidPrice!=null)
+					q.setBidPrice(bidPrice);
+				if(askPrice!=null)
+					q.setAskPrice(askPrice);
+				if(bidSize!=null)
+					q.setBidQuantity(bidSize);
+				if(askSize!=null)
+					q.setAskQuantity(askSize);
 				q.setInstrumentSpecification(spec);
 				quotes.add(q);
 				if(quotes.size()==1000){
 					quoteDao.update(quotes);
 					quotes.clear();
 					System.out.print("Q");
-				}
-				//quoteDao.update(q);
-				
+				}				
 			}
-			else if(type.equals("Trade")){
+			/*else if(type.equals("Trade")){
 				Double tradePrice = Double.parseDouble(lineParts[5]);
 				Double tradeVol = Double.parseDouble(lineParts[6]);
 				TradeIndication ti = new TradeIndication(spec);
@@ -99,7 +118,7 @@ class TRTHImporter2 {
 				}
 			}
 			
-			
+			*/
 			
 			
 			l = br.readLine();
